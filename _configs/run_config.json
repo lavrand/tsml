@@ -4,17 +4,17 @@
     "jobs": [
         {
             "id": 1,
-            "time_expansions": 10,
-            "dispatch_threshold": 0.25,
-            "subtree_focus_threshold": 1,
-            "dispatch_frontier_size": 1
+            "param1": 10,
+            "param2": 0.25,
+            "param3": 1,
+            "param4": 1
         },
         {
             "id": 2,
-            "time_expansions": 25,
-            "dispatch_threshold": 0.25,
-            "subtree_focus_threshold": 1,
-            "dispatch_frontier_size": 1
+            "param1": 25,
+            "param2": 0.25,
+            "param3": 1,
+            "param4": 1
         }
     ]
 }
