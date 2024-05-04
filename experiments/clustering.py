@@ -9,17 +9,25 @@ from tslearn.metrics import dtw, soft_dtw
 from tslearn.barycenters import dtw_barycenter_averaging, softdtw_barycenter
 from tslearn.datasets import UCR_UEA_datasets
 
+
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
     # Load the dataset
     X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
-    # Initialize the model
+    # Initialize the model with a default
+    model = None
+
     if metric == 'euclidean':
         model = TimeSeriesKMeans(n_clusters=n_clusters, metric=metric)
     elif metric == 'dtw':
         model = TimeSeriesKMeans(n_clusters=n_clusters, metric=dtw)
     elif metric == 'softdtw' and gamma is not None:
         model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+
+    # Check if model is still None
+    if model is None:
+        raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
+
 
     # Get initial RAM usage
     process = psutil.Process(os.getpid())
