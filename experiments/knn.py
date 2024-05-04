@@ -1,15 +1,14 @@
 # Import necessary libraries
 import itertools
 import multiprocessing
-import os
 import time
 import traceback
 import pandas as pd
-import psutil
 from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
+
 
 def run_experiment(params):
     k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name = params
@@ -27,23 +26,14 @@ def run_experiment(params):
 
     return result
 
+
 def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, iteration, dataset_name):
     start_time = time.time()
     failed = False
-    ram_usages = []
     predictions = None  # Initialize predictions
 
     try:
         model.fit(X_train, y_train)
-
-        # Calculate RAM usage periodically during model training
-        while True:
-            process = psutil.Process(os.getpid())
-            ram_usages.append(process.memory_info().rss)  # in bytes
-            time.sleep(1)  # pause for 1 second
-            if model.training_finished:  # assuming the model has a property that indicates if training is finished
-                break
-
         predictions = model.predict(X_test)
 
     except Exception as e:
@@ -60,10 +50,6 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         recall = recall_score(y_test, predictions, average='macro')
     else:
         accuracy = f1 = precision = recall = None
-
-    # Calculate average and maximum RAM usage
-    ram_average = sum(ram_usages) / len(ram_usages) if ram_usages else None
-    ram_maximum = max(ram_usages) if ram_usages else None
 
     # Get the logger from the task
     logger = task.get_logger()
@@ -91,10 +77,9 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         'Precision': precision,
         'Recall': recall,
         'Run Time': end_time - start_time,
-        'Failed': failed,
-        'RAM Average': ram_average,
-        'RAM Maximum': ram_maximum
+        'Failed': failed
     }
+
 
 def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
     # Initialize ClearML Task
