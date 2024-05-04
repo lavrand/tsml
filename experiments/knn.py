@@ -1,9 +1,11 @@
 # Import necessary libraries
 import itertools
 import multiprocessing
+import os
 import time
 import traceback
 import pandas as pd
+import psutil
 from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tslearn.datasets import UCR_UEA_datasets
@@ -32,6 +34,10 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     failed = False
     predictions = None  # Initialize predictions
 
+    # Get initial RAM usage
+    process = psutil.Process(os.getpid())
+    initial_ram_usage = process.memory_info().rss  # in bytes
+
     try:
         model.fit(X_train, y_train)
         predictions = model.predict(X_test)
@@ -41,6 +47,12 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         print(f"An error occurred: {traceback.format_exc()}")
 
     end_time = time.time()
+
+    # Get final RAM usage
+    final_ram_usage = process.memory_info().rss  # in bytes
+
+    # Calculate RAM usage in GB
+    ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
     # Calculate metrics
     if predictions is not None:
@@ -61,6 +73,7 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         logger.report_scalar('Precision', 'precision', precision, iteration)
         logger.report_scalar('Recall', 'recall', recall, iteration)
     logger.report_scalar('Timing', 'run_time', end_time - start_time, iteration)
+    logger.report_scalar('RAM Usage (GB)', 'ram_usage', ram_usage, iteration)
     logger.flush()  # Ensure all metrics are uploaded
 
     # Return the metrics and other information for the table
@@ -77,7 +90,8 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         'Precision': precision,
         'Recall': recall,
         'Run Time': end_time - start_time,
-        'Failed': failed
+        'Failed': failed,
+        'RAM Usage (GB)': ram_usage
     }
 
 
