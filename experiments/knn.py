@@ -1,5 +1,6 @@
 # Import necessary libraries
 import itertools
+import multiprocessing
 import os
 import time
 import traceback
@@ -10,6 +11,21 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 
+def run_experiment(params):
+    k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name = params
+
+    # Adjust for SoftDTW which needs a gamma parameter
+    if metric == 'softdtw' and gamma is not None:
+        model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric, metric_params={'gamma': gamma})
+        model_name = f'{metric} (gamma={gamma})'
+    else:
+        model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric)
+        model_name = metric
+
+    # Run and log the model
+    result = run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, i, dataset_name)
+
+    return result
 
 def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, iteration, dataset_name):
     start_time = time.time()
@@ -95,21 +111,12 @@ def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
         # Generate combinations of k_values, distance_metrics, and gamma_values
         combinations = list(itertools.product(k_values, distance_metrics, gamma_values or [None]))
 
-        # Loop over different configurations
-        for i, (k, metric, gamma) in enumerate(combinations):
-            # Adjust for SoftDTW which needs a gamma parameter
-            if metric == 'softdtw' and gamma is not None:
-                model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric, metric_params={'gamma': gamma})
-                model_name = f'{metric} (gamma={gamma})'
-            else:
-                model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric)
-                model_name = metric
+        # Prepare the parameters for each experiment
+        experiment_params = [(k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name) for i, (k, metric, gamma) in enumerate(combinations)]
 
-            # Run and log the model
-            result = run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, i, dataset_name)
-
-            # Add the result to the list
-            results.append(result)
+        # Create a multiprocessing pool and run the experiments in parallel
+        with multiprocessing.Pool() as pool:
+            results.extend(pool.map(run_experiment, experiment_params))
 
         task.close()
 
