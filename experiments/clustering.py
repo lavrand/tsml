@@ -1,13 +1,13 @@
 import os
 import time
-import numpy as np
+
 import pandas as pd
 import psutil
-from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, homogeneity_score, completeness_score, v_measure_score
+from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
+    homogeneity_score, completeness_score, v_measure_score
 from tslearn.clustering import TimeSeriesKMeans
-from tslearn.metrics import dtw, soft_dtw
-from tslearn.barycenters import dtw_barycenter_averaging, softdtw_barycenter
 from tslearn.datasets import UCR_UEA_datasets
+from tslearn.metrics import dtw, soft_dtw
 
 
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):

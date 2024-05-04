@@ -5,10 +5,12 @@ import subprocess
 import sys
 from datetime import datetime
 
+
 def log_message(message, log_file):
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     log_file.write(f"[{timestamp}] {message}\n")
     print(f"[{timestamp}] {message}\n")
+
 
 # Check if a command line argument has been provided
 if len(sys.argv) < 2:
@@ -38,6 +40,7 @@ experiment_files = [f for f in os.listdir(experiments_dir) if f.endswith('.py')]
 # Get a list of all config files in the configs directory
 config_files = [f for f in os.listdir(configs_dir) if f.endswith('.ini')]
 
+
 # Function to run the dispscript commands
 def run_subprocess(command, i=None):
     stdout, stderr = None, None  # Initialize these to avoid UnboundLocalError
@@ -64,6 +67,7 @@ def run_subprocess(command, i=None):
     # Return stdout, stderr, and returncode
     return stdout, stderr, process.returncode
 
+
 # For each experiment file
 for experiment_file in experiment_files:
     # For each config file
@@ -80,5 +84,3 @@ for experiment_file in experiment_files:
 
 log_file.close()
 log_file_error.close()
-
-
