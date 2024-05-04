@@ -1,5 +1,6 @@
 # Import necessary libraries
 import itertools
+import os
 import time
 from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
@@ -8,10 +9,26 @@ from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 import csv
 import pandas as pd
 
+import psutil
+import traceback
+
 def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, iteration, dataset_name):
     start_time = time.time()
-    model.fit(X_train, y_train)
-    predictions = model.predict(X_test)
+    failed = False
+    ram_usage = None
+
+    try:
+        model.fit(X_train, y_train)
+        predictions = model.predict(X_test)
+
+        # Calculate RAM usage
+        process = psutil.Process(os.getpid())
+        ram_usage = process.memory_info().rss  # in bytes
+
+    except Exception as e:
+        failed = True
+        print(f"An error occurred: {traceback.format_exc()}")
+
     end_time = time.time()
 
     # Calculate metrics
@@ -44,7 +61,9 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
         'F1 Score': f1,
         'Precision': precision,
         'Recall': recall,
-        'Run Time': end_time - start_time
+        'Run Time': end_time - start_time,
+        'Failed': failed,
+        'RAM': ram_usage
     }
 
 def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
