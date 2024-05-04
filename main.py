@@ -1,13 +1,8 @@
-import os
-import subprocess
 import configparser
-import itertools
-import multiprocessing
 import os
 import signal
 import subprocess
 import sys
-import tarfile
 from datetime import datetime
 
 def log_message(message, log_file):
@@ -26,14 +21,6 @@ config_file = sys.argv[1]
 # Directory paths
 experiments_dir = 'experiments'
 configs_dir = '_configs'
-
-# Check if a command line argument has been provided
-if len(sys.argv) < 2:
-    log_message("Usage: python main.py <config_file>")
-    sys.exit(1)
-
-# The second command line argument is expected to be the config file name
-config_file = sys.argv[1]
 
 # Initialize the configparser
 config = configparser.ConfigParser()

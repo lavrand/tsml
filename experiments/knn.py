@@ -126,11 +126,11 @@ def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
 
     # Write the results to a CSV file
     df = pd.DataFrame(results)
-    csv_file_path = 'experiment_results.csv'
+    csv_file_path = 'knn_experiment_results.csv'
     df.to_csv(csv_file_path, index=False)
 
     # Upload the CSV file to ClearML
-    task.upload_artifact('experiment_results', csv_file_path)
+    task.upload_artifact('knn_experiment_results', csv_file_path)
 
 # Example usage
 if __name__ == "__main__":
