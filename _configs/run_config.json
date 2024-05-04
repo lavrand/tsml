@@ -1,0 +1,20 @@
+{
+    "repository_url": "https://github.com/lavrand/ai-planners.git",
+    "python_script": "_update_configs_args.py",
+    "jobs": [
+        {
+            "id": 1,
+            "time_expansions": 10,
+            "dispatch_threshold": 0.25,
+            "subtree_focus_threshold": 1,
+            "dispatch_frontier_size": 1
+        },
+        {
+            "id": 2,
+            "time_expansions": 25,
+            "dispatch_threshold": 0.25,
+            "subtree_focus_threshold": 1,
+            "dispatch_frontier_size": 1
+        }
+    ]
+}
