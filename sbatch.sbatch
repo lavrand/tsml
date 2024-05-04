@@ -6,7 +6,7 @@
 #SBATCH --output /cs_storage/andreyl/pancake/ai_planner_job-id-%J.out ### output log for running job - %J is the job number variable
 #SBATCH --mail-user=andreyl@post.bgu.ac.il ### users email for sending job status notifications
 #SBATCH --mail-type=BEGIN,END,FAIL ### conditions when to send the email. ALL,BEGIN,END,FAIL, REQUEU, NONE
-#SBATCH --mem=24G
+#SBATCH --mem=32G
 #SBATCH --cpus-per-task=10 # 6 cpus per task  use for multithreading, usually with --tasks=1
 #SBATCH --tasks=1 # 2 processes  use for processing of few programs concurrently in a job (with srun). Use just 1 otherwise
 ### Print some data to output file ###
