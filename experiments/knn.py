@@ -31,6 +31,7 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     start_time = time.time()
     failed = False
     ram_usages = []
+    predictions = None  # Initialize predictions
 
     try:
         model.fit(X_train, y_train)
@@ -52,10 +53,13 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     end_time = time.time()
 
     # Calculate metrics
-    accuracy = accuracy_score(y_test, predictions)
-    f1 = f1_score(y_test, predictions, average='macro')
-    precision = precision_score(y_test, predictions, average='macro')
-    recall = recall_score(y_test, predictions, average='macro')
+    if predictions is not None:
+        accuracy = accuracy_score(y_test, predictions)
+        f1 = f1_score(y_test, predictions, average='macro')
+        precision = precision_score(y_test, predictions, average='macro')
+        recall = recall_score(y_test, predictions, average='macro')
+    else:
+        accuracy = f1 = precision = recall = None
 
     # Calculate average and maximum RAM usage
     ram_average = sum(ram_usages) / len(ram_usages) if ram_usages else None
@@ -65,10 +69,11 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     logger = task.get_logger()
 
     # Log metrics and model info in ClearML
-    logger.report_scalar('Accuracy', 'accuracy', accuracy, iteration)
-    logger.report_scalar('F1 Score', 'f1', f1, iteration)
-    logger.report_scalar('Precision', 'precision', precision, iteration)
-    logger.report_scalar('Recall', 'recall', recall, iteration)
+    if accuracy is not None and f1 is not None and precision is not None and recall is not None:
+        logger.report_scalar('Accuracy', 'accuracy', accuracy, iteration)
+        logger.report_scalar('F1 Score', 'f1', f1, iteration)
+        logger.report_scalar('Precision', 'precision', precision, iteration)
+        logger.report_scalar('Recall', 'recall', recall, iteration)
     logger.report_scalar('Timing', 'run_time', end_time - start_time, iteration)
     logger.flush()  # Ensure all metrics are uploaded
 
