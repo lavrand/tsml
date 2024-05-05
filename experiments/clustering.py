@@ -25,6 +25,7 @@ def setup_logger(dataset, n_clusters, metric, gamma):
     return logger
 
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
+    result = None
     try:
         from clearml import Task
     except ImportError:

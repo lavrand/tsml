@@ -24,6 +24,7 @@ def setup_logger(dataset, metric, gamma):
     return logger
 
 def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
+    result = None
     try:
         from clearml import Task
     except ImportError:
