@@ -24,6 +24,7 @@ def setup_logger(dataset, k, metric, gamma):
     return logger
 
 def run_knn_experiment(dataset_name, k, metric, gamma):
+    result = None
     try:
         from clearml import Task
     except ImportError:
