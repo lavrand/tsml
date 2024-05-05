@@ -7,8 +7,14 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.neighbors import NearestCentroid
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
+from clearml import Task
 
 def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
+    # Initialize ClearML Task
+    task = Task.init(project_name='Time Series Classification', task_name='NCC Experiment')
+    task.connect_configuration(
+        {"dataset_name": dataset_name, "metric": metric, "gamma": gamma})
+
     # Load the dataset
     X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
@@ -58,8 +64,8 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
     predict_time = end_predict - start_predict
     total_time = fit_time + predict_time
 
-    # Return the metrics and timings
-    return {
+    # Prepare the results
+    result = {
         'Dataset': dataset_name,
         'Accuracy': accuracy,
         'F1 Score': f1,
@@ -70,6 +76,17 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         'Total Time': total_time,
         'RAM Usage (GB)': ram_usage
     }
+
+    # Write the results to a CSV file
+    df = pd.DataFrame(result, index=[0])
+    csv_file_path = 'ncc_experiment_results.csv'
+    df.to_csv(csv_file_path, index=False)
+
+    # Upload the CSV file to ClearML
+    task.upload_artifact('ncc_experiment_results', csv_file_path)
+
+    return result
+
 
 if __name__ == "__main__":
     # Create an argument parser

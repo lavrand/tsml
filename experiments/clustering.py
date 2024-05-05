@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+from clearml import Task
 import pandas as pd
 import psutil
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
@@ -9,7 +10,13 @@ from tslearn.clustering import TimeSeriesKMeans
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
 
+
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
+    # Initialize ClearML Task
+    task = Task.init(project_name='Time Series Classification', task_name='Clustering Experiment')
+    task.connect_configuration(
+        {"dataset_name": dataset_name, "n_clusters": n_clusters, "metric": metric, "gamma": gamma})
+
     # Load the dataset
     X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
@@ -74,8 +81,8 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     predict_time_test = end_predict_test - start_predict_test
     total_time = fit_time + predict_time_train + predict_time_test
 
-    # Return the metrics and timings
-    return {
+    # Prepare the results
+    result = {
         'Dataset': dataset_name,
         'ARI Train': ari_train,
         'NMI Train': nmi_train,
@@ -95,6 +102,17 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         'Total Time': total_time,
         'RAM Usage (GB)': ram_usage
     }
+
+    # Write the results to a CSV file
+    df = pd.DataFrame(result, index=[0])
+    csv_file_path = 'clustering_experiment_results.csv'
+    df.to_csv(csv_file_path, index=False)
+
+    # Upload the CSV file to ClearML
+    task.upload_artifact('clustering_experiment_results', csv_file_path)
+
+    return result
+
 
 if __name__ == "__main__":
     # Create an argument parser
