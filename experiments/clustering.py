@@ -2,11 +2,12 @@ import argparse
 import os
 import time
 import threading
+import logging
 from clearml import Task
 import pandas as pd
 import psutil
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
-    homogeneity_score, completeness_score, v_measure_score
+    homogeneity_score, completeness_score, v_measure_score, accuracy_score, f1_score, precision_score, recall_score
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
@@ -14,16 +15,23 @@ from tslearn.metrics import dtw, soft_dtw
 # Create a global lock
 lock = threading.Lock()
 
+def setup_logger(dataset, n_clusters, metric, gamma):
+    logger = logging.getLogger(f'clustering_{dataset}_{n_clusters}_{metric}_{gamma}')
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(f'clustering_{dataset}_{n_clusters}_{metric}_{gamma}.log')
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
+
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
-    # Initialize ClearML Task
     task = Task.init(project_name='Time Series Classification', task_name='Clustering Experiment')
     task.connect_configuration(
         {"dataset_name": dataset_name, "n_clusters": n_clusters, "metric": metric, "gamma": gamma})
 
-    # Load the dataset
     X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
-    # Initialize the model with a default
     model = None
 
     if metric == 'euclidean':
@@ -33,110 +41,75 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     elif metric == 'softdtw' and gamma is not None:
         model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
 
-    # Check if model is still None
     if model is None:
         raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
 
-    # Get initial RAM usage
     process = psutil.Process(os.getpid())
-    initial_ram_usage = process.memory_info().rss  # in bytes
+    initial_ram_usage = process.memory_info().rss
 
-    # Fit the model and measure the time
-    start_fit = time.time()
-    model.fit(X_train)
-    end_fit = time.time()
+    logger = setup_logger(dataset_name, n_clusters, metric, gamma)
+    try:
+        start_fit = time.time()
+        model.fit(X_train)
+        end_fit = time.time()
 
-    # Predict the labels for X_train and measure the time
-    start_predict_train = time.time()
-    y_pred_train = model.predict(X_train)
-    end_predict_train = time.time()
+        start_predict_train = time.time()
+        y_pred_train = model.predict(X_train)
+        end_predict_train = time.time()
 
-    # Predict the labels for X_test and measure the time
-    start_predict_test = time.time()
-    y_pred_test = model.predict(X_test)
-    end_predict_test = time.time()
+        start_predict_test = time.time()
+        y_pred_test = model.predict(X_test)
+        end_predict_test = time.time()
 
-    # Get final RAM usage
-    final_ram_usage = process.memory_info().rss  # in bytes
+        final_ram_usage = process.memory_info().rss
+        ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
-    # Calculate RAM usage in GB
-    ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
+        accuracy = accuracy_score(y_test, y_pred_test)
+        f1 = f1_score(y_test, y_pred_test, average='macro')
+        precision = precision_score(y_test, y_pred_test, average='macro')
+        recall = recall_score(y_test, y_pred_test, average='macro')
 
-    # Calculate the metrics for X_train
-    ari_train = adjusted_rand_score(y_train, y_pred_train)
-    nmi_train = normalized_mutual_info_score(y_train, y_pred_train)
-    ami_train = adjusted_mutual_info_score(y_train, y_pred_train)
-    homogeneity_train = homogeneity_score(y_train, y_pred_train)
-    completeness_train = completeness_score(y_train, y_pred_train)
-    v_score_train = v_measure_score(y_train, y_pred_train)
+        fit_time = end_fit - start_fit
+        predict_time_train = end_predict_train - start_predict_train
+        predict_time_test = end_predict_test - start_predict_test
+        total_time = fit_time + predict_time_train + predict_time_test
 
-    # Calculate the metrics for X_test
-    ari_test = adjusted_rand_score(y_test, y_pred_test)
-    nmi_test = normalized_mutual_info_score(y_test, y_pred_test)
-    ami_test = adjusted_mutual_info_score(y_test, y_pred_test)
-    homogeneity_test = homogeneity_score(y_test, y_pred_test)
-    completeness_test = completeness_score(y_test, y_pred_test)
-    v_score_test = v_measure_score(y_test, y_pred_test)
+        result = {
+            'Dataset': dataset_name,
+            'Accuracy': accuracy,
+            'F1 Score': f1,
+            'Precision': precision,
+            'Recall': recall,
+            'Fit Time': fit_time,
+            'Predict Time Train': predict_time_train,
+            'Predict Time Test': predict_time_test,
+            'Total Time': total_time,
+            'RAM Usage (GB)': ram_usage
+        }
 
-    # Calculate the timings
-    fit_time = end_fit - start_fit
-    predict_time_train = end_predict_train - start_predict_train
-    predict_time_test = end_predict_test - start_predict_test
-    total_time = fit_time + predict_time_train + predict_time_test
+        df = pd.DataFrame(result, index=[0])
+        csv_file_path = 'clustering_experiment_results.csv'
 
-    # Prepare the results
-    result = {
-        'Dataset': dataset_name,
-        'ARI Train': ari_train,
-        'NMI Train': nmi_train,
-        'AMI Train': ami_train,
-        'Homogeneity Train': homogeneity_train,
-        'Completeness Train': completeness_train,
-        'V-score Train': v_score_train,
-        'ARI Test': ari_test,
-        'NMI Test': nmi_test,
-        'AMI Test': ami_test,
-        'Homogeneity Test': homogeneity_test,
-        'Completeness Test': completeness_test,
-        'V-score Test': v_score_test,
-        'Fit Time': fit_time,
-        'Predict Time Train': predict_time_train,
-        'Predict Time Test': predict_time_test,
-        'Total Time': total_time,
-        'RAM Usage (GB)': ram_usage
-    }
+        with lock:
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
-    # Write the results to a CSV file
-    df = pd.DataFrame(result, index=[0])
-    csv_file_path = 'clustering_experiment_results.csv'
-
-    # Use the lock to prevent race conditions
-    with lock:
-        # Check if the file exists
-        if os.path.exists(csv_file_path):
-            # If the file exists, append without the header
-            df.to_csv(csv_file_path, mode='a', header=False, index=False)
-        else:
-            # If the file does not exist, create it with a header
-            df.to_csv(csv_file_path, mode='w', header=True, index=False)
-
-    # Upload the CSV file to ClearML
-    task.upload_artifact('clustering_experiment_results', csv_file_path)
+        task.upload_artifact('clustering_experiment_results', csv_file_path)
+        logger.info('Experiment completed successfully')
+    except Exception as e:
+        logger.error(f'An error occurred: {e}', exc_info=True)
 
     return result
 
 
 if __name__ == "__main__":
-    # Create an argument parser
     parser = argparse.ArgumentParser(description='Run clustering experiment with specified parameters.')
     parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
     parser.add_argument('--n_clusters', type=int, required=True, help='Number of clusters to use.')
     parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
     parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
-
-    # Parse the arguments
     args = parser.parse_args()
-
-    # Run the clustering experiment with the specified parameters
     result = run_clustering_experiment(args.dataset, args.n_clusters, args.metric, args.gamma)
     print(result)
