@@ -28,7 +28,6 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     if model is None:
         raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
 
-
     # Get initial RAM usage
     process = psutil.Process(os.getpid())
     initial_ram_usage = process.memory_info().rss  # in bytes
@@ -38,10 +37,15 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     model.fit(X_train)
     end_fit = time.time()
 
-    # Predict the labels and measure the time
-    start_predict = time.time()
-    y_pred = model.predict(X_test)
-    end_predict = time.time()
+    # Predict the labels for X_train and measure the time
+    start_predict_train = time.time()
+    y_pred_train = model.predict(X_train)
+    end_predict_train = time.time()
+
+    # Predict the labels for X_test and measure the time
+    start_predict_test = time.time()
+    y_pred_test = model.predict(X_test)
+    end_predict_test = time.time()
 
     # Get final RAM usage
     final_ram_usage = process.memory_info().rss  # in bytes
@@ -49,30 +53,46 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     # Calculate RAM usage in GB
     ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
-    # Calculate the metrics
-    ari = adjusted_rand_score(y_test, y_pred)
-    nmi = normalized_mutual_info_score(y_test, y_pred)
-    ami = adjusted_mutual_info_score(y_test, y_pred)
-    homogeneity = homogeneity_score(y_test, y_pred)
-    completeness = completeness_score(y_test, y_pred)
-    v_score = v_measure_score(y_test, y_pred)
+    # Calculate the metrics for X_train
+    ari_train = adjusted_rand_score(y_train, y_pred_train)
+    nmi_train = normalized_mutual_info_score(y_train, y_pred_train)
+    ami_train = adjusted_mutual_info_score(y_train, y_pred_train)
+    homogeneity_train = homogeneity_score(y_train, y_pred_train)
+    completeness_train = completeness_score(y_train, y_pred_train)
+    v_score_train = v_measure_score(y_train, y_pred_train)
+
+    # Calculate the metrics for X_test
+    ari_test = adjusted_rand_score(y_test, y_pred_test)
+    nmi_test = normalized_mutual_info_score(y_test, y_pred_test)
+    ami_test = adjusted_mutual_info_score(y_test, y_pred_test)
+    homogeneity_test = homogeneity_score(y_test, y_pred_test)
+    completeness_test = completeness_score(y_test, y_pred_test)
+    v_score_test = v_measure_score(y_test, y_pred_test)
 
     # Calculate the timings
     fit_time = end_fit - start_fit
-    predict_time = end_predict - start_predict
-    total_time = fit_time + predict_time
+    predict_time_train = end_predict_train - start_predict_train
+    predict_time_test = end_predict_test - start_predict_test
+    total_time = fit_time + predict_time_train + predict_time_test
 
     # Return the metrics and timings
     return {
         'Dataset': dataset_name,
-        'ARI': ari,
-        'NMI': nmi,
-        'AMI': ami,
-        'Homogeneity': homogeneity,
-        'Completeness': completeness,
-        'V-score': v_score,
+        'ARI Train': ari_train,
+        'NMI Train': nmi_train,
+        'AMI Train': ami_train,
+        'Homogeneity Train': homogeneity_train,
+        'Completeness Train': completeness_train,
+        'V-score Train': v_score_train,
+        'ARI Test': ari_test,
+        'NMI Test': nmi_test,
+        'AMI Test': ami_test,
+        'Homogeneity Test': homogeneity_test,
+        'Completeness Test': completeness_test,
+        'V-score Test': v_score_test,
         'Fit Time': fit_time,
-        'Predict Time': predict_time,
+        'Predict Time Train': predict_time_train,
+        'Predict Time Test': predict_time_test,
         'Total Time': total_time,
         'RAM Usage (GB)': ram_usage
     }
