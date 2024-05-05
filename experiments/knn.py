@@ -1,4 +1,5 @@
 # Import necessary libraries
+import argparse
 import itertools
 import multiprocessing
 import os
@@ -136,10 +137,17 @@ def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
     # Upload the CSV file to ClearML
     task.upload_artifact('knn_experiment_results', csv_file_path)
 
-# Example usage
-if __name__ == "__main__":
-    k_values = [1, 3, 5]
-    distance_metrics = ['euclidean', 'dtw', 'softdtw']
-    gamma_values = [0.1, 1, 10]
 
-    run_knn_experiment(k_values, distance_metrics, gamma_values)
+if __name__ == "__main__":
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Run KNN experiment with specified parameters.')
+    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
+    parser.add_argument('--k', type=int, required=True, help='Number of neighbors to use.')
+    parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
+    parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Run the KNN experiment with the specified parameters
+    run_knn_experiment([args.k], [args.metric], [args.gamma] if args.gamma is not None else None)
