@@ -8,6 +8,7 @@ import pandas as pd
 import psutil
 import threading
 import logging
+
 from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tslearn.datasets import UCR_UEA_datasets
@@ -48,48 +49,7 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     predictions = None
     process = psutil.Process(os.getpid())
     initial_ram_usage = process.memory_info().rss
-    try:
-        model.fit(X_train, y_train)
-        predictions = model.predict(X_test)
-    except Exception as e:
-        failed = True
-        print(f"An error occurred: {traceback.format_exc()}")
-    end_time = time.time()
-    final_ram_usage = process.memory_info().rss
-    ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
-    if predictions is not None:
-        accuracy = accuracy_score(y_test, predictions)
-        f1 = f1_score(y_test, predictions, average='macro')
-        precision = precision_score(y_test, predictions, average='macro')
-        recall = recall_score(y_test, predictions, average='macro')
-    else:
-        accuracy = f1 = precision = recall = None
-    logger = task.get_logger()
-    logger.report_scalar('Iteration', 'iteration', iteration, iteration)
-    if accuracy is not None and f1 is not None and precision is not None and recall is not None:
-        logger.report_scalar('Accuracy', 'accuracy', accuracy, iteration)
-        logger.report_scalar('F1 Score', 'f1', f1, iteration)
-        logger.report_scalar('Precision', 'precision', precision, iteration)
-        logger.report_scalar('Recall', 'recall', recall, iteration)
-    logger.report_scalar('Timing', 'run_time', end_time - start_time, iteration)
-    logger.report_scalar('RAM Usage (GB)', 'ram_usage', ram_usage, iteration)
-    logger.flush()
-    return {
-        'Dataset Source': 'UCR',
-        'Dataset': dataset_name,
-        'Train Size': len(X_train),
-        'Test Size': len(X_test),
-        'Length': len(X_train[0]),
-        'Method Group': 'KNN',
-        'Method': model_name,
-        'Accuracy': accuracy,
-        'F1 Score': f1,
-        'Precision': precision,
-        'Recall': recall,
-        'Run Time': end_time - start_time,
-        'Failed': failed,
-        'RAM Usage (GB)': ram_usage
-    }
+
 
 def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
     task = Task.init(project_name='Time Series Classification', task_name='KNN Experiment')

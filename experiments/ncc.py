@@ -9,7 +9,6 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.neighbors import NearestCentroid
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
-from clearml import Task
 
 # Create a global lock
 lock = threading.Lock()
@@ -25,6 +24,12 @@ def setup_logger(dataset, metric, gamma):
     return logger
 
 def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
+    try:
+        from clearml import Task
+    except ImportError:
+        print("clearml is not installed on this system.")
+        return
+
     task = Task.init(project_name='Time Series Classification', task_name='NCC Experiment')
     task.connect_configuration(
         {"dataset_name": dataset_name, "metric": metric, "gamma": gamma})
@@ -48,13 +53,8 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
 
     logger = setup_logger(dataset_name, metric, gamma)
     try:
-        start_fit = time.time()
         model.fit(X_train, y_train)
-        end_fit = time.time()
-
-        start_predict = time.time()
         y_pred = model.predict(X_test)
-        end_predict = time.time()
 
         final_ram_usage = process.memory_info().rss
         ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
@@ -64,19 +64,12 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         precision = precision_score(y_test, y_pred, average='macro')
         recall = recall_score(y_test, y_pred, average='macro')
 
-        fit_time = end_fit - start_fit
-        predict_time = end_predict - start_predict
-        total_time = fit_time + predict_time
-
         result = {
             'Dataset': dataset_name,
             'Accuracy': accuracy,
             'F1 Score': f1,
             'Precision': precision,
             'Recall': recall,
-            'Fit Time': fit_time,
-            'Predict Time': predict_time,
-            'Total Time': total_time,
             'RAM Usage (GB)': ram_usage
         }
 
@@ -95,7 +88,6 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         logger.error(f'An error occurred: {e}', exc_info=True)
 
     return result
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run NCC experiment with specified parameters.')

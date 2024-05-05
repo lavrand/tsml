@@ -3,7 +3,6 @@ import os
 import time
 import threading
 import logging
-from clearml import Task
 import pandas as pd
 import psutil
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
@@ -26,6 +25,12 @@ def setup_logger(dataset, n_clusters, metric, gamma):
     return logger
 
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
+    try:
+        from clearml import Task
+    except ImportError:
+        print("clearml is not installed on this system.")
+        return
+
     task = Task.init(project_name='Time Series Classification', task_name='Clustering Experiment')
     task.connect_configuration(
         {"dataset_name": dataset_name, "n_clusters": n_clusters, "metric": metric, "gamma": gamma})
@@ -102,7 +107,6 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         logger.error(f'An error occurred: {e}', exc_info=True)
 
     return result
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run clustering experiment with specified parameters.')
