@@ -25,15 +25,6 @@ def setup_logger(dataset, k, metric, gamma):
 
 def run_knn_experiment(dataset_name, k, metric, gamma):
     result = None
-    try:
-        from clearml import Task
-    except ImportError:
-        print("clearml is not installed on this system.")
-        return
-
-    task = Task.init(project_name='Time Series Classification', task_name='KNN Experiment')
-    task.connect_configuration(
-        {"dataset_name": dataset_name, "k": k, "metric": metric, "gamma": gamma})
 
     X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
     X_train = X_train.reshape(X_train.shape[0], -1)
@@ -84,7 +75,6 @@ def run_knn_experiment(dataset_name, k, metric, gamma):
             else:
                 df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
-        task.upload_artifact('knn_experiment_results', csv_file_path)
         logger.info('Experiment completed successfully')
     except Exception as e:
         logger.error(f'An error occurred: {e}', exc_info=True)
