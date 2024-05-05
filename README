@@ -6,10 +6,17 @@ This project contains a series of experiments for time series classification usi
 
 1. Install the necessary Python packages:
 
+    for local:
+
     ```bash
     pip install -r requirements.txt
     ```
 
+    for cluster:
+
+    ```bash
+    conda install --file requirements.txt
+    ```
 2. Configure the necessary parameters in `prepare_batches.py`. Here are the parameters you can adjust:
 
     - Datasets: List of datasets to use for the experiments. Example: `['CBF']`
