@@ -7,11 +7,14 @@ import time
 import traceback
 import pandas as pd
 import psutil
+import threading
 from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.neighbors import KNeighborsTimeSeriesClassifier
 
+# Create a global lock
+lock = threading.Lock()
 
 def run_experiment(params):
     k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name = params
@@ -132,7 +135,16 @@ def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
     # Write the results to a CSV file
     df = pd.DataFrame(results)
     csv_file_path = 'knn_experiment_results.csv'
-    df.to_csv(csv_file_path, index=False)
+
+    # Use the lock to prevent race conditions
+    with lock:
+        # Check if the file exists
+        if os.path.exists(csv_file_path):
+            # If the file exists, append without the header
+            df.to_csv(csv_file_path, mode='a', header=False, index=False)
+        else:
+            # If the file does not exist, create it with a header
+            df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
     # Upload the CSV file to ClearML
     task.upload_artifact('knn_experiment_results', csv_file_path)
@@ -141,13 +153,12 @@ def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
 if __name__ == "__main__":
     # Create an argument parser
     parser = argparse.ArgumentParser(description='Run KNN experiment with specified parameters.')
-    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
-    parser.add_argument('--k', type=int, required=True, help='Number of neighbors to use.')
-    parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
-    parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
+    parser.add_argument('--k_values', type=int, nargs='+', required=True, help='List of K values to use.')
+    parser.add_argument('--distance_metrics', type=str, nargs='+', required=True, help='List of distance metrics to use.')
+    parser.add_argument('--gamma_values', type=float, nargs='*', required=False, help='List of gamma values to use for SoftDTW metric.')
 
     # Parse the arguments
     args = parser.parse_args()
 
     # Run the KNN experiment with the specified parameters
-    run_knn_experiment([args.k], [args.metric], [args.gamma] if args.gamma is not None else None)
+    run_knn_experiment(args.k_values, args.distance_metrics, args.gamma_values)

@@ -3,11 +3,15 @@ import os
 import time
 import pandas as pd
 import psutil
+import threading
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
 from sklearn.neighbors import NearestCentroid
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
 from clearml import Task
+
+# Create a global lock
+lock = threading.Lock()
 
 def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
     # Initialize ClearML Task
@@ -80,7 +84,16 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
     # Write the results to a CSV file
     df = pd.DataFrame(result, index=[0])
     csv_file_path = 'ncc_experiment_results.csv'
-    df.to_csv(csv_file_path, index=False)
+
+    # Use the lock to prevent race conditions
+    with lock:
+        # Check if the file exists
+        if os.path.exists(csv_file_path):
+            # If the file exists, append without the header
+            df.to_csv(csv_file_path, mode='a', header=False, index=False)
+        else:
+            # If the file does not exist, create it with a header
+            df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
     # Upload the CSV file to ClearML
     task.upload_artifact('ncc_experiment_results', csv_file_path)
