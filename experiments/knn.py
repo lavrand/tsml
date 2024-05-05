@@ -66,6 +66,10 @@ def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, itera
     # Get the logger from the task
     logger = task.get_logger()
 
+    # Explicitly report the iteration to ClearML
+    logger.report_scalar('Iteration', 'iteration', iteration, iteration)
+
+
     # Log metrics and model info in ClearML
     if accuracy is not None and f1 is not None and precision is not None and recall is not None:
         logger.report_scalar('Accuracy', 'accuracy', accuracy, iteration)
