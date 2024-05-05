@@ -4,7 +4,13 @@ This project contains a series of experiments for time series classification usi
 
 ## Setup
 
-1. Configure the necessary parameters in `prepare_batches.py`. Here are the parameters you can adjust:
+1. Install the necessary Python packages:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+2. Configure the necessary parameters in `prepare_batches.py`. Here are the parameters you can adjust:
 
     - Datasets: List of datasets to use for the experiments. Example: `['CBF']`
     - K values: List of K values to use for KNN. Example: `[1, 3, 5]`
@@ -12,13 +18,13 @@ This project contains a series of experiments for time series classification usi
     - Gamma values: List of gamma values to use for SoftDTW. Example: `[0.1, 1, 10]`
     - Number of clusters: List of number of clusters to use for clustering. Example: `[2, 3, 4]`
 
-2. Run `prepare_batches.py` on the cluster using Python 3:
+3. Run `prepare_batches.py` on the cluster using Python 3:
 
     ```bash
     python3 prepare_batches.py
     ```
 
-3. Install ClearML:
+4. Install ClearML:
 
     ```bash
     conda install -c conda-forge clearml
@@ -30,11 +36,35 @@ This project contains a series of experiments for time series classification usi
     conda install clearml-agent
     ```
 
-4. Run the batches on the cluster:
+5. Run the batches on the cluster:
 
     ```bash
     python3 run.py
     ```
+
+## Running Individual Experiments
+
+You can also run individual experiments locally. Here are the commands to run each experiment:
+
+- KNN Experiment:
+
+    ```bash
+    python3 knn.py --dataset {dataset} --k {k} --metric {metric} --gamma {gamma}
+    ```
+
+- NCC Experiment:
+
+    ```bash
+    python3 ncc.py --dataset {dataset} --metric {metric} --gamma {gamma}
+    ```
+
+- Clustering Experiment:
+
+    ```bash
+    python3 clustering.py --dataset {dataset} --n_clusters {n_clusters} --metric {metric} --gamma {gamma}
+    ```
+
+Replace `{dataset}`, `{k}`, `{metric}`, `{gamma}`, and `{n_clusters}` with your desired values.
 
 ## Output
 
