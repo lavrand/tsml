@@ -1,6 +1,6 @@
+import argparse
 import os
 import time
-
 import pandas as pd
 import psutil
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
@@ -8,7 +8,6 @@ from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, a
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
-
 
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
     # Load the dataset
@@ -97,26 +96,17 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         'RAM Usage (GB)': ram_usage
     }
 
-# Example usage
 if __name__ == "__main__":
-    # Run the clustering experiment with different metrics and gamma values
-    results = []
-    n_clusters = 3  # Set the number of clusters
-    for metric in ['euclidean', 'dtw', 'softdtw']:
-        for gamma in [None, 0.1, 1, 10]:
-            if metric == 'softdtw' and gamma is None:
-                continue  # Skip this combination
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Run clustering experiment with specified parameters.')
+    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
+    parser.add_argument('--n_clusters', type=int, required=True, help='Number of clusters to use.')
+    parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
+    parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
 
-            # Load all dataset names
-            datasets = UCR_UEA_datasets().list_datasets()
+    # Parse the arguments
+    args = parser.parse_args()
 
-            # Loop over all datasets
-            for dataset_name in datasets:
-                result = run_clustering_experiment(dataset_name, n_clusters, metric, gamma)
-                result['Metric'] = metric
-                result['Gamma'] = gamma
-                results.append(result)
-
-    # Write the results to a CSV file
-    df = pd.DataFrame(results)
-    df.to_csv('clustering_experiment_results.csv', index=False)
+    # Run the clustering experiment with the specified parameters
+    result = run_clustering_experiment(args.dataset, args.n_clusters, args.metric, args.gamma)
+    print(result)

@@ -1,3 +1,4 @@
+import argparse
 import os
 import time
 import pandas as pd
@@ -6,7 +7,6 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 from sklearn.neighbors import NearestCentroid
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
-
 
 def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
     # Load the dataset
@@ -26,7 +26,6 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
     # Check if model is still None
     if model is None:
         raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
-
 
     # Get initial RAM usage
     process = psutil.Process(os.getpid())
@@ -72,25 +71,16 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         'RAM Usage (GB)': ram_usage
     }
 
-# Example usage
 if __name__ == "__main__":
-    # Run the NCC experiment with different metrics and gamma values
-    results = []
-    for metric in ['euclidean', 'dtw', 'softdtw']:
-        for gamma in [None, 0.1, 1, 10]:
-            if metric == 'softdtw' and gamma is None:
-                continue  # Skip this combination
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Run NCC experiment with specified parameters.')
+    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
+    parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
+    parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
 
-            # Load all dataset names
-            datasets = UCR_UEA_datasets().list_datasets()
+    # Parse the arguments
+    args = parser.parse_args()
 
-            # Loop over all datasets
-            for dataset_name in datasets:
-                result = run_ncc_experiment(dataset_name, metric, gamma)
-                result['Metric'] = metric
-                result['Gamma'] = gamma
-                results.append(result)
-
-    # Write the results to a CSV file
-    df = pd.DataFrame(results)
-    df.to_csv('ncc_experiment_results.csv', index=False)
+    # Run the NCC experiment with the specified parameters
+    result = run_ncc_experiment(args.dataset, args.metric, args.gamma)
+    print(result)
