@@ -3,3 +3,4 @@ pandas
 psutil
 scikit-learn
 tslearn
+clearml-agent

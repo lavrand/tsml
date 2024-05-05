@@ -1,18 +1,14 @@
 import argparse
-import itertools
-import multiprocessing
 import os
 import time
-import traceback
 import pandas as pd
 import psutil
 import threading
 import logging
-
-from clearml import Task
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+from sklearn.neighbors import KNeighborsClassifier
 from tslearn.datasets import UCR_UEA_datasets
-from tslearn.neighbors import KNeighborsTimeSeriesClassifier
+from tslearn.metrics import dtw, soft_dtw
 
 # Create a global lock
 lock = threading.Lock()
@@ -27,56 +23,78 @@ def setup_logger(dataset, k, metric, gamma):
     logger.addHandler(handler)
     return logger
 
-def run_experiment(params):
-    k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name = params
-    logger = setup_logger(dataset_name, k, metric, gamma)
-    if metric == 'softdtw' and gamma is not None:
-        model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric, metric_params={'gamma': gamma})
-        model_name = f'{metric} (gamma={gamma})'
-    else:
-        model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric=metric)
-        model_name = metric
+def run_knn_experiment(dataset_name, k, metric, gamma):
     try:
-        result = run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, i, dataset_name)
-        logger.info('Experiment completed successfully')
-    except Exception as e:
-        logger.error(f'An error occurred: {e}', exc_info=True)
-    return result
+        from clearml import Task
+    except ImportError:
+        print("clearml is not installed on this system.")
+        return
 
-def run_and_log(model, model_name, X_train, y_train, X_test, y_test, task, iteration, dataset_name):
-    start_time = time.time()
-    failed = False
-    predictions = None
+    task = Task.init(project_name='Time Series Classification', task_name='KNN Experiment')
+    task.connect_configuration(
+        {"dataset_name": dataset_name, "k": k, "metric": metric, "gamma": gamma})
+
+    X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+
+    model = None
+
+    if metric == 'euclidean':
+        model = KNeighborsClassifier(n_neighbors=k)
+    elif metric == 'dtw':
+        model = KNeighborsClassifier(n_neighbors=k, metric=dtw)
+    elif metric == 'softdtw' and gamma is not None:
+        model = KNeighborsClassifier(n_neighbors=k, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+
+    if model is None:
+        raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
+
     process = psutil.Process(os.getpid())
     initial_ram_usage = process.memory_info().rss
 
+    logger = setup_logger(dataset_name, k, metric, gamma)
+    try:
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
 
-def run_knn_experiment(k_values, distance_metrics, gamma_values=None):
-    task = Task.init(project_name='Time Series Classification', task_name='KNN Experiment')
-    task.connect_configuration(
-        {"k_values": k_values, "distance_metrics": distance_metrics, "gamma_values": gamma_values})
-    datasets = UCR_UEA_datasets().list_datasets()
-    results = []
-    for dataset_name in datasets:
-        X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
-        combinations = list(itertools.product(k_values, distance_metrics, gamma_values or [None]))
-        experiment_params = [(k, metric, gamma, X_train, y_train, X_test, y_test, task, i, dataset_name) for i, (k, metric, gamma) in enumerate(combinations)]
-        with multiprocessing.Pool() as pool:
-            results.extend(pool.map(run_experiment, experiment_params))
-        task.close()
-    df = pd.DataFrame(results)
-    csv_file_path = 'knn_experiment_results.csv'
-    with lock:
-        if os.path.exists(csv_file_path):
-            df.to_csv(csv_file_path, mode='a', header=False, index=False)
-        else:
-            df.to_csv(csv_file_path, mode='w', header=True, index=False)
-    task.upload_artifact('knn_experiment_results', csv_file_path)
+        final_ram_usage = process.memory_info().rss
+        ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
+
+        accuracy = accuracy_score(y_test, y_pred)
+        f1 = f1_score(y_test, y_pred, average='macro')
+        precision = precision_score(y_test, y_pred, average='macro')
+        recall = recall_score(y_test, y_pred, average='macro')
+
+        result = {
+            'Dataset': dataset_name,
+            'Accuracy': accuracy,
+            'F1 Score': f1,
+            'Precision': precision,
+            'Recall': recall,
+            'RAM Usage (GB)': ram_usage
+        }
+
+        df = pd.DataFrame(result, index=[0])
+        csv_file_path = 'knn_experiment_results.csv'
+
+        with lock:
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
+
+        task.upload_artifact('knn_experiment_results', csv_file_path)
+        logger.info('Experiment completed successfully')
+    except Exception as e:
+        logger.error(f'An error occurred: {e}', exc_info=True)
+
+    return result
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run KNN experiment with specified parameters.')
-    parser.add_argument('--k_values', type=int, nargs='+', required=True, help='List of K values to use.')
-    parser.add_argument('--distance_metrics', type=str, nargs='+', required=True, help='List of distance metrics to use.')
-    parser.add_argument('--gamma_values', type=float, nargs='*', required=False, help='List of gamma values to use for SoftDTW metric.')
+    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
+    parser.add_argument('--k', type=int, required=True, help='K value to use.')
+    parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
+    parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
     args = parser.parse_args()
-    run_knn_experiment(args.k_values, args.distance_metrics, args.gamma_values)
+    result = run_knn_experiment(args.dataset, args.k, args.metric, args.gamma)
+    print(result)
