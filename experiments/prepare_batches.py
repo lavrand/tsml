@@ -21,7 +21,7 @@ sbatch_template_knn = """#!/bin/bash
 module load anaconda
 source activate new_env
 
-python knn.py --dataset {dataset} --k {k} --metric {metric} --gamma {gamma}
+python3 knn.py --dataset {dataset} --k {k} --metric {metric} --gamma {gamma}
 """
 
 sbatch_template_ncc = """#!/bin/bash
@@ -38,7 +38,7 @@ sbatch_template_ncc = """#!/bin/bash
 module load anaconda
 source activate new_env
 
-python ncc.py --dataset {dataset} --metric {metric} --gamma {gamma}
+python3 ncc.py --dataset {dataset} --metric {metric} --gamma {gamma}
 """
 
 sbatch_template_clustering = """#!/bin/bash
@@ -55,7 +55,7 @@ sbatch_template_clustering = """#!/bin/bash
 module load anaconda
 source activate new_env
 
-python clustering.py --dataset {dataset} --n_clusters {n_clusters} --metric {metric} --gamma {gamma}
+python3 clustering.py --dataset {dataset} --n_clusters {n_clusters} --metric {metric} --gamma {gamma}
 """
 
 for dataset in datasets:
