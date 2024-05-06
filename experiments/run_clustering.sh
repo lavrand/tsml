@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Activate the Conda environment
+source activate new_env2
+
 # Get the current timestamp
 timestamp=$(date +%Y%m%d%H%M%S)
 
