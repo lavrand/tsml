@@ -44,7 +44,7 @@ bash run_ncc.sh {dataset} {metric} {gamma}
 sbatch_template_clustering = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name clustering_{dataset}_{n_clusters}_{metric}_{gamma}
+#SBATCH --job-name clustering_{dataset}_{n_cluster}_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/clustering_{dataset}_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
