@@ -45,7 +45,7 @@ sbatch_template_clustering = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
 #SBATCH --job-name clustering_{dataset}_{n_clusters}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/clustering_{dataset}_{n_clusters}_{metric}_{gamma}-id-%J.out
+#SBATCH --output /cs_storage/andreyl/pancake/clustering_{dataset}_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mem=32G
@@ -55,7 +55,7 @@ sbatch_template_clustering = """#!/bin/bash
 module load anaconda
 source activate new_env2
 
-bash run_clustering.sh {dataset} {n_clusters} {metric} {gamma}
+bash run_clustering.sh {dataset} {n_cluster} {metric} {gamma}
 """
 
 for dataset in datasets:
