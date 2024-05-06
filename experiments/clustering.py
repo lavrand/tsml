@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 import psutil
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
-    homogeneity_score, completeness_score, v_measure_score, accuracy_score, f1_score, precision_score, recall_score
+    homogeneity_score, completeness_score, v_measure_score
 from tslearn.clustering import TimeSeriesKMeans
 from tslearn.datasets import UCR_UEA_datasets
 from tslearn.metrics import dtw, soft_dtw
@@ -61,26 +61,17 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         final_ram_usage = process.memory_info().rss
         ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
-        accuracy = accuracy_score(y_test, y_pred_test)
-        f1 = f1_score(y_test, y_pred_test, average='macro')
-        precision = precision_score(y_test, y_pred_test, average='macro')
-        recall = recall_score(y_test, y_pred_test, average='macro')
-
-        fit_time = end_fit - start_fit
-        predict_time_train = end_predict_train - start_predict_train
-        predict_time_test = end_predict_test - start_predict_test
-        total_time = fit_time + predict_time_train + predict_time_test
-
         result = {
-            'Dataset': dataset_name,
-            'Accuracy': accuracy,
-            'F1 Score': f1,
-            'Precision': precision,
-            'Recall': recall,
-            'Fit Time': fit_time,
-            'Predict Time Train': predict_time_train,
-            'Predict Time Test': predict_time_test,
-            'Total Time': total_time,
+            'Adjusted Rand Index': adjusted_rand_score(y_test, y_pred_test),
+            'Normalized Mutual Information': normalized_mutual_info_score(y_test, y_pred_test),
+            'Adjusted Mutual Information': adjusted_mutual_info_score(y_test, y_pred_test),
+            'Homogeneity': homogeneity_score(y_test, y_pred_test),
+            'Completeness': completeness_score(y_test, y_pred_test),
+            'V-score': v_measure_score(y_test, y_pred_test),
+            'Fit Time': end_fit - start_fit,
+            'Predict Time Train': end_predict_train - start_predict_train,
+            'Predict Time Test': end_predict_test - start_predict_test,
+            'Total Time': (end_fit - start_fit) + (end_predict_train - start_predict_train) + (end_predict_test - start_predict_test),
             'RAM Usage (GB)': ram_usage
         }
 
