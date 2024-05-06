@@ -70,9 +70,9 @@ for dataset in datasets:
                 with open(f"ncc_{dataset}_{metric}_{gamma}.sbatch", "w") as f:
                     f.write(sbatch_content_ncc)
 
-    for n_clusters in n_clusters:
+    for n_cluster in n_clusters:
         for metric in distance_metrics:
             for gamma in gamma_values:
-                sbatch_content_clustering = sbatch_template_clustering.format(dataset=dataset, n_clusters=n_clusters, metric=metric, gamma=gamma)
-                with open(f"clustering_{dataset}_{n_clusters}_{metric}_{gamma}.sbatch", "w") as f:
+                sbatch_content_clustering = sbatch_template_clustering.format(dataset=dataset, n_cluster=n_cluster, metric=metric, gamma=gamma)
+                with open(f"clustering_{dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
                     f.write(sbatch_content_clustering)
