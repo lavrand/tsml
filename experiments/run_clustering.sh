@@ -3,6 +3,9 @@
 # Activate the Conda environment
 source activate new_env2
 
+# Install tslearn
+pip install tslearn
+
 # Get the current timestamp
 timestamp=$(date +%Y%m%d%H%M%S)
 
