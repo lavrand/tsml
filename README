@@ -31,19 +31,7 @@ This project contains a series of experiments for time series classification usi
     python3 prepare_batches.py
     ```
 
-4. Install ClearML:
-
-    ```bash
-    conda install -c conda-forge clearml
-    ```
-
-    or
-
-    ```bash
-    conda install clearml-agent
-    ```
-
-5. Run the batches on the cluster:
+4. Run the batches on the cluster:
 
     ```bash
     python3 run.py
