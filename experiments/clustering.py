@@ -14,7 +14,6 @@ try:
         from tslearn.metrics import dtw, soft_dtw
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
-        raise e
 
     # Create a global lock
     lock = threading.Lock()
