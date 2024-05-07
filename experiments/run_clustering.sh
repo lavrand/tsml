@@ -7,8 +7,11 @@ source activate new_env2
 pip install tslearn
 pip install h5py
 
+# Split the input string into an array using '_' as the delimiter
+IFS='_' read -ra datasets <<< "$1"
+
 # Run the Python script and redirect stdout and stderr to a unique log file
-for dataset in $1
+for dataset in "${datasets[@]}"
 do
     # Get the current timestamp for each run
     timestamp=$(date +%Y%m%d%H%M%S)
