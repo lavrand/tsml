@@ -58,21 +58,20 @@ source activate new_env2
 bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 """
 
-for dataset in datasets:
-    for k in k_values:
-        for metric in distance_metrics:
-            for gamma in gamma_values:
-                sbatch_content_knn = sbatch_template_knn.format(datasets=" ".join(datasets), k=k, metric=metric, gamma=gamma)
-                with open(f"knn_{dataset}_{k}_{metric}_{gamma}.sbatch", "w") as f:
-                    f.write(sbatch_content_knn)
+for k in k_values:
+    for metric in distance_metrics:
+        for gamma in gamma_values:
+            sbatch_content_knn = sbatch_template_knn.format(datasets=" ".join(datasets), k=k, metric=metric, gamma=gamma)
+            with open(f"knn_{k}_{metric}_{gamma}.sbatch", "w") as f:
+                f.write(sbatch_content_knn)
 
-                sbatch_content_ncc = sbatch_template_ncc.format(datasets=" ".join(datasets), metric=metric, gamma=gamma)
-                with open(f"ncc_{dataset}_{metric}_{gamma}.sbatch", "w") as f:
-                    f.write(sbatch_content_ncc)
+            sbatch_content_ncc = sbatch_template_ncc.format(datasets=" ".join(datasets), metric=metric, gamma=gamma)
+            with open(f"ncc_{metric}_{gamma}.sbatch", "w") as f:
+                f.write(sbatch_content_ncc)
 
-    for n_cluster in n_clusters:
-        for metric in distance_metrics:
-            for gamma in gamma_values:
-                sbatch_content_clustering = sbatch_template_clustering.format(datasets=" ".join(datasets), n_cluster=n_cluster, metric=metric, gamma=gamma)
-                with open(f"clustering_{dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
-                    f.write(sbatch_content_clustering)
+for n_cluster in n_clusters:
+    for metric in distance_metrics:
+        for gamma in gamma_values:
+            sbatch_content_clustering = sbatch_template_clustering.format(datasets=" ".join(datasets), n_cluster=n_cluster, metric=metric, gamma=gamma)
+            with open(f"clustering_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
+                f.write(sbatch_content_clustering)
