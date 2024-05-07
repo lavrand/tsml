@@ -46,8 +46,15 @@ def run_knn_experiment(dataset_name, k, metric, gamma):
 
     logger = setup_logger(dataset_name, k, metric, gamma)
     try:
+        start_time = time.time()
+        start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
+
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
+
+        end_time = time.time()
+        end_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
+        total_time = end_time - start_time
 
         final_ram_usage = process.memory_info().rss
         ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
@@ -59,6 +66,12 @@ def run_knn_experiment(dataset_name, k, metric, gamma):
 
         result = {
             'Dataset': dataset_name,
+            'K': k,
+            'Metric': metric,
+            'Gamma': gamma,
+            'Experiment Start Time': start_date_time,
+            'Experiment End Time': end_date_time,
+            'Experiment Total Time (seconds)': total_time,
             'Accuracy': accuracy,
             'F1 Score': f1,
             'Precision': precision,

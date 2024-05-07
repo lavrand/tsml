@@ -47,6 +47,9 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
     logger = setup_logger(dataset_name, n_clusters, metric, gamma)
     try:
         start_fit = time.time()
+        start_time = time.time()
+        start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
+
         model.fit(X_train)
         end_fit = time.time()
 
@@ -58,10 +61,21 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         y_pred_test = model.predict(X_test)
         end_predict_test = time.time()
 
+        end_time = time.time()
+        end_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
+        total_time = end_time - start_time
+
         final_ram_usage = process.memory_info().rss
         ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
         result = {
+            'Dataset': dataset_name,
+            'Number of Clusters': n_clusters,
+            'Metric': metric,
+            'Gamma': gamma,
+            'Experiment Start Time': start_date_time,
+            'Experiment End Time': end_date_time,
+            'Experiment Total Time (seconds)': total_time,
             'Adjusted Rand Index': adjusted_rand_score(y_test, y_pred_test),
             'Normalized Mutual Information': normalized_mutual_info_score(y_test, y_pred_test),
             'Adjusted Mutual Information': adjusted_mutual_info_score(y_test, y_pred_test),
@@ -71,7 +85,8 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
             'Fit Time': end_fit - start_fit,
             'Predict Time Train': end_predict_train - start_predict_train,
             'Predict Time Test': end_predict_test - start_predict_test,
-            'Total Time': (end_fit - start_fit) + (end_predict_train - start_predict_train) + (end_predict_test - start_predict_test),
+            'Total Time': (end_fit - start_fit) + (end_predict_train - start_predict_train) + (
+                        end_predict_test - start_predict_test),
             'RAM Usage (GB)': ram_usage
         }
 
