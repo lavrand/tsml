@@ -25,27 +25,28 @@ def setup_logger(dataset, n_clusters, metric, gamma):
     return logger
 
 def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
-    result = None
 
-    X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
-
-    model = None
-
-    if metric == 'euclidean':
-        model = TimeSeriesKMeans(n_clusters=n_clusters, metric=metric)
-    elif metric == 'dtw':
-        model = TimeSeriesKMeans(n_clusters=n_clusters, metric=dtw)
-    elif metric == 'softdtw' and gamma is not None:
-        model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
-
-    if model is None:
-        raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
-
-    process = psutil.Process(os.getpid())
-    initial_ram_usage = process.memory_info().rss
-
-    logger = setup_logger(dataset_name, n_clusters, metric, gamma)
     try:
+        result = None
+
+        X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+
+        model = None
+
+        if metric == 'euclidean':
+            model = TimeSeriesKMeans(n_clusters=n_clusters, metric=metric)
+        elif metric == 'dtw':
+            model = TimeSeriesKMeans(n_clusters=n_clusters, metric=dtw)
+        elif metric == 'softdtw' and gamma is not None:
+            model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+
+        if model is None:
+            raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
+
+        process = psutil.Process(os.getpid())
+        initial_ram_usage = process.memory_info().rss
+
+        logger = setup_logger(dataset_name, n_clusters, metric, gamma)
         start_fit = time.time()
         start_time = time.time()
         start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))

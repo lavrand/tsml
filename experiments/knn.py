@@ -24,28 +24,29 @@ def setup_logger(dataset, k, metric, gamma):
     return logger
 
 def run_knn_experiment(dataset_name, k, metric, gamma):
-    result = None
 
-    X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
-    X_train = X_train.reshape(X_train.shape[0], -1)
-    X_test = X_test.reshape(X_test.shape[0], -1)
-    model = None
-
-    if metric == 'euclidean':
-        model = KNeighborsClassifier(n_neighbors=k)
-    elif metric == 'dtw':
-        model = KNeighborsClassifier(n_neighbors=k, metric=dtw)
-    elif metric == 'softdtw' and gamma is not None:
-        model = KNeighborsClassifier(n_neighbors=k, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
-
-    if model is None:
-        raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
-
-    process = psutil.Process(os.getpid())
-    initial_ram_usage = process.memory_info().rss
-
-    logger = setup_logger(dataset_name, k, metric, gamma)
     try:
+        result = None
+
+        X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+        X_train = X_train.reshape(X_train.shape[0], -1)
+        X_test = X_test.reshape(X_test.shape[0], -1)
+        model = None
+
+        if metric == 'euclidean':
+            model = KNeighborsClassifier(n_neighbors=k)
+        elif metric == 'dtw':
+            model = KNeighborsClassifier(n_neighbors=k, metric=dtw)
+        elif metric == 'softdtw' and gamma is not None:
+            model = KNeighborsClassifier(n_neighbors=k, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+
+        if model is None:
+            raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
+
+        process = psutil.Process(os.getpid())
+        initial_ram_usage = process.memory_info().rss
+
+        logger = setup_logger(dataset_name, k, metric, gamma)
         start_time = time.time()
         start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
