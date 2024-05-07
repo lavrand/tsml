@@ -5,74 +5,74 @@ datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CB
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
 gamma_values = [0.1, 1, 10]
-n_clusters = [2, 3, 4]
+n_clusters = [4]
 
 sbatch_template_knn = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name knn_{dataset}_{k}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/knn_{dataset}_{k}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name knn_{datasets}_{k}_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/knn_{datasets}_{k}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=10
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
 module load anaconda
 source activate new_env2
 
-bash run_knn.sh {dataset} {k} {metric} {gamma}
+bash run_knn.sh {datasets} {k} {metric} {gamma}
 """
 
 sbatch_template_ncc = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name ncc_{dataset}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/ncc_{dataset}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name ncc_{datasets}_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/ncc_{datasets}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=10
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
 module load anaconda
 source activate new_env2
 
-bash run_ncc.sh {dataset} {metric} {gamma}
+bash run_ncc.sh {datasets} {metric} {gamma}
 """
 
 sbatch_template_clustering = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name clustering_{dataset}_{n_cluster}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/clustering_{dataset}_{n_cluster}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name clustering_{datasets}_{n_cluster}_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/clustering_{datasets}_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=32G
-#SBATCH --cpus-per-task=10
+#SBATCH --mem=8G
+#SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
 module load anaconda
 source activate new_env2
 
-bash run_clustering.sh {dataset} {n_cluster} {metric} {gamma}
+bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 """
 
 for dataset in datasets:
     for k in k_values:
         for metric in distance_metrics:
             for gamma in gamma_values:
-                sbatch_content_knn = sbatch_template_knn.format(dataset=dataset, k=k, metric=metric, gamma=gamma)
+                sbatch_content_knn = sbatch_template_knn.format(datasets=" ".join(datasets), k=k, metric=metric, gamma=gamma)
                 with open(f"knn_{dataset}_{k}_{metric}_{gamma}.sbatch", "w") as f:
                     f.write(sbatch_content_knn)
 
-                sbatch_content_ncc = sbatch_template_ncc.format(dataset=dataset, metric=metric, gamma=gamma)
+                sbatch_content_ncc = sbatch_template_ncc.format(datasets=" ".join(datasets), metric=metric, gamma=gamma)
                 with open(f"ncc_{dataset}_{metric}_{gamma}.sbatch", "w") as f:
                     f.write(sbatch_content_ncc)
 
     for n_cluster in n_clusters:
         for metric in distance_metrics:
             for gamma in gamma_values:
-                sbatch_content_clustering = sbatch_template_clustering.format(dataset=dataset, n_cluster=n_cluster, metric=metric, gamma=gamma)
+                sbatch_content_clustering = sbatch_template_clustering.format(datasets=" ".join(datasets), n_cluster=n_cluster, metric=metric, gamma=gamma)
                 with open(f"clustering_{dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
                     f.write(sbatch_content_clustering)

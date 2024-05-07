@@ -83,10 +83,11 @@ def run_knn_experiment(dataset_name, k, metric, gamma):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Run KNN experiment with specified parameters.')
-    parser.add_argument('--dataset', type=str, required=True, help='Name of the dataset to use.')
+    parser.add_argument('--datasets', type=str, nargs='+', required=True, help='List of datasets to use.')
     parser.add_argument('--k', type=int, required=True, help='K value to use.')
     parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
     parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
     args = parser.parse_args()
-    result = run_knn_experiment(args.dataset, args.k, args.metric, args.gamma)
-    print(result)
+    for dataset in args.datasets:
+        result = run_knn_experiment(dataset, args.k, args.metric, args.gamma)
+        print(result)
