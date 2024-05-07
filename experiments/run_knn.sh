@@ -5,6 +5,7 @@ source activate new_env2
 
 # Install tslearn
 pip install tslearn
+pip install h5py
 
 # Run the Python script and redirect stdout and stderr to a unique log file
 for dataset in $1
