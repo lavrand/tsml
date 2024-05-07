@@ -66,6 +66,7 @@ def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         recall = recall_score(y_test, y_pred, average='macro')
 
         result = {
+            'Experiment': 'NCC',
             'Dataset': dataset_name,
             'Metric': metric,
             'Gamma': gamma,

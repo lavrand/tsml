@@ -69,6 +69,7 @@ def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamm
         ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
         result = {
+            'Experiment': 'Clustering',
             'Dataset': dataset_name,
             'Number of Clusters': n_clusters,
             'Metric': metric,

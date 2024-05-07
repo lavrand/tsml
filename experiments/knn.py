@@ -65,6 +65,7 @@ def run_knn_experiment(dataset_name, k, metric, gamma):
         recall = recall_score(y_test, y_pred, average='macro')
 
         result = {
+            'Experiment': 'KNN',
             'Dataset': dataset_name,
             'K': k,
             'Metric': metric,
