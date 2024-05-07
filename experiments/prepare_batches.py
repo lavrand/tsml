@@ -10,8 +10,8 @@ n_clusters = [4]
 sbatch_template_knn = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name knn_{datasets}_{k}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/knn_{datasets}_{k}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name knn_{k}_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/knn_{k}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mem=8G
@@ -27,8 +27,8 @@ bash run_knn.sh {datasets} {k} {metric} {gamma}
 sbatch_template_ncc = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name ncc_{datasets}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/ncc_{datasets}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name ncc_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/ncc_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mem=8G
@@ -44,8 +44,8 @@ bash run_ncc.sh {datasets} {metric} {gamma}
 sbatch_template_clustering = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 1-23:50:00
-#SBATCH --job-name clustering_{datasets}_{n_cluster}_{metric}_{gamma}
-#SBATCH --output /cs_storage/andreyl/pancake/clustering_{datasets}_{n_cluster}_{metric}_{gamma}-id-%J.out
+#SBATCH --job-name clustering_{n_cluster}_{metric}_{gamma}
+#SBATCH --output /cs_storage/andreyl/pancake/clustering_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mem=8G
