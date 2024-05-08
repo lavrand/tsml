@@ -19,7 +19,7 @@ sbatch_template_knn = """#!/bin/bash
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env2
+source activate new_env3
 
 bash run_knn.sh {datasets} {k} {metric} {gamma}
 """
@@ -31,12 +31,12 @@ sbatch_template_ncc = """#!/bin/bash
 #SBATCH --output /cs_storage/andreyl/pancake/ncc_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env2
+source activate new_env3
 
 bash run_ncc.sh {datasets} {metric} {gamma}
 """
@@ -53,7 +53,7 @@ sbatch_template_clustering = """#!/bin/bash
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env2
+source activate new_env3
 
 bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 """
