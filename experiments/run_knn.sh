@@ -1,11 +1,7 @@
 #!/bin/bash
 
 # Activate the Conda environment
-source activate new_env2
-
-# Install tslearn
-pip install tslearn
-pip install h5py
+source activate new_env3
 
 # Split the input string into an array using '_' as the delimiter
 IFS='_' read -ra datasets <<< "$1"
