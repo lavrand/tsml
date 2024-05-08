@@ -1,5 +1,6 @@
 try:
     try:
+        import numpy as np
         import argparse
         import os
         import time
@@ -34,7 +35,8 @@ try:
             result = None
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
-
+            # Determine the number of clusters based on the unique labels in y_train
+            n_clusters = len(np.unique(y_train))
             model = None
 
             if metric == 'euclidean':
