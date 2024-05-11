@@ -15,15 +15,18 @@ for dataset in datasets:
                 for gamma in gamma_values:
                     # Run KNN experiment
                     subprocess.run(['python3', 'knn.py', '--dataset', dataset, '--k', str(k), '--metric', metric, '--gamma', str(gamma)])
-
-                    # Run NCC experiment
-                    subprocess.run(['python3', 'ncc.py', '--dataset', dataset, '--metric', metric, '--gamma', str(gamma)])
             else:
                 # Run KNN experiment
                 subprocess.run(['python3', 'knn.py', '--dataset', dataset, '--k', str(k), '--metric', metric])
 
+    for metric in distance_metrics:
+        if metric == 'softdtw':
+            for gamma in gamma_values:
                 # Run NCC experiment
-                subprocess.run(['python3', 'ncc.py', '--dataset', dataset, '--metric', metric])
+                subprocess.run(['python3', 'ncc.py', '--dataset', dataset, '--metric', metric, '--gamma', str(gamma)])
+        else:
+            # Run NCC experiment
+            subprocess.run(['python3', 'ncc.py', '--dataset', dataset, '--metric', metric])
 
     for n_cluster in n_clusters:
         for metric in distance_metrics:
