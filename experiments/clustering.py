@@ -131,7 +131,7 @@ try:
         parser.add_argument('--datasets', type=str, nargs='+', required=True, help='List of datasets to use.')
         parser.add_argument('--n_clusters', type=int, required=True, help='Number of clusters to use.')
         parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
-        parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
+        parser.add_argument('--gamma', type=float, default=None, help='Gamma value for SoftDTW')
         args = parser.parse_args()
         for dataset in args.datasets:
             result = run_clustering_experiment(dataset, args.n_clusters, args.metric, args.gamma)
