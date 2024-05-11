@@ -4,7 +4,8 @@ datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CB
 # datasets = ['CBF']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
-gamma_values = [0.1, 1, 10]
+# gamma_values = [0.1, 1, 10]
+gamma_values = [1]
 n_clusters = [3]
 
 sbatch_template_knn = """#!/bin/bash

@@ -13,6 +13,8 @@ try:
         from tslearn.clustering import TimeSeriesKMeans
         from tslearn.datasets import UCR_UEA_datasets
         from tslearn.metrics import dtw, soft_dtw
+        from tslearn.metrics import dtw, soft_dtw
+        from tslearn.utils import to_time_series_dataset
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
 
@@ -43,9 +45,8 @@ try:
                 model = TimeSeriesKMeans(n_clusters=n_clusters, metric=metric)
             elif metric == 'dtw':
                 model = TimeSeriesKMeans(n_clusters=n_clusters, metric='dtw')
-            elif metric == 'softdtw' and gamma is not None:
-                model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
-
+            elif metric == 'softdtw':
+                model = TimeSeriesKMeans(n_clusters=n_clusters, metric='softdtw')
             if model is None:
                 raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
 
