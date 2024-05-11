@@ -42,7 +42,7 @@ try:
             if metric == 'euclidean':
                 model = TimeSeriesKMeans(n_clusters=n_clusters, metric=metric)
             elif metric == 'dtw':
-                model = TimeSeriesKMeans(n_clusters=n_clusters, metric=dtw)
+                model = TimeSeriesKMeans(n_clusters=n_clusters, metric='dtw')
             elif metric == 'softdtw' and gamma is not None:
                 model = TimeSeriesKMeans(n_clusters=n_clusters, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
 
