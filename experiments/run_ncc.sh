@@ -18,3 +18,4 @@ do
     } || {
         echo "Python script failed for dataset: $dataset, metric: $2, gamma: $3"
     }
+done
