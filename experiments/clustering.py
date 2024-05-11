@@ -32,9 +32,8 @@ try:
         return logger
 
     def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
-
+        result = {}
         try:
-            result = None
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
             # Determine the number of clusters based on the unique labels in y_train
@@ -76,7 +75,7 @@ try:
             final_ram_usage = process.memory_info().rss
             ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
-            result = {
+            result.update({
                 'Experiment': 'Clustering',
                 'Dataset': dataset_name,
                 'Number of Clusters': n_clusters,
@@ -95,22 +94,30 @@ try:
                 'Predict Time Train': end_predict_train - start_predict_train,
                 'Predict Time Test': end_predict_test - start_predict_test,
                 'Total Time': (end_fit - start_fit) + (end_predict_train - start_predict_train) + (
-                            end_predict_test - start_predict_test),
+                        end_predict_test - start_predict_test),
                 'RAM Usage (GB)': ram_usage
-            }
+            })
 
-            df = pd.DataFrame(result, index=[0])
-            csv_file_path = 'clustering_experiment_results.csv'
+            result.update({
+                'Experiment Succeeded': True,
+                'Comment': 'Experiment completed successfully'
+            })
 
-            with lock:
-                if os.path.exists(csv_file_path):
-                    df.to_csv(csv_file_path, mode='a', header=False, index=False)
-                else:
-                    df.to_csv(csv_file_path, mode='w', header=True, index=False)
-
-            logger.info('Experiment completed successfully')
         except Exception as e:
+            result.update({
+                'Experiment Succeeded': False,
+                'Comment': str(e)
+            })
             logger.error(f'An error occurred: {e}', exc_info=True)
+
+        df = pd.DataFrame(result, index=[0])
+        csv_file_path = 'clustering_experiment_results.csv'
+
+        with lock:
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
         return result
 

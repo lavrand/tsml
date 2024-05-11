@@ -30,9 +30,8 @@ try:
         return logger
 
     def run_knn_experiment(dataset_name, k, metric, gamma):
-
+        result = {}
         try:
-            result = None
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
             X_train = X_train.reshape(X_train.shape[0], -1)
@@ -71,7 +70,7 @@ try:
             precision = precision_score(y_test, y_pred, average='macro')
             recall = recall_score(y_test, y_pred, average='macro')
 
-            result = {
+            result.update({
                 'Experiment': 'KNN',
                 'Dataset': dataset_name,
                 'K': k,
@@ -85,20 +84,28 @@ try:
                 'Precision': precision,
                 'Recall': recall,
                 'RAM Usage (GB)': ram_usage
-            }
+            })
 
-            df = pd.DataFrame(result, index=[0])
-            csv_file_path = 'knn_experiment_results.csv'
+            result.update({
+                'Experiment Succeeded': True,
+                'Comment': 'Experiment completed successfully'
+            })
 
-            with lock:
-                if os.path.exists(csv_file_path):
-                    df.to_csv(csv_file_path, mode='a', header=False, index=False)
-                else:
-                    df.to_csv(csv_file_path, mode='w', header=True, index=False)
-
-            logger.info('Experiment completed successfully')
         except Exception as e:
+            result.update({
+                'Experiment Succeeded': False,
+                'Comment': str(e)
+            })
             logger.error(f'An error occurred: {e}', exc_info=True)
+
+        df = pd.DataFrame(result, index=[0])
+        csv_file_path = 'knn_experiment_results.csv'
+
+        with lock:
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
         return result
 
