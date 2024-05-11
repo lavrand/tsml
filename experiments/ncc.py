@@ -7,6 +7,7 @@ try:
         import psutil
         import threading
         import logging
+        import numpy as np
         from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
         from sklearn.neighbors import NearestCentroid
         from tslearn.datasets import UCR_UEA_datasets
@@ -32,6 +33,11 @@ try:
         try:
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+
+            # Replace NaN values with 0
+            X_train = np.nan_to_num(X_train)
+            X_test = np.nan_to_num(X_test)
+
             X_train = X_train.reshape(X_train.shape[0], -1)
             X_test = X_test.reshape(X_test.shape[0], -1)
 

@@ -36,6 +36,11 @@ try:
         try:
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+
+            # Replace NaN values with 0
+            X_train = np.nan_to_num(X_train)
+            X_test = np.nan_to_num(X_test)
+
             # Determine the number of clusters based on the unique labels in y_train
             n_clusters = len(np.unique(y_train))
             model = None
