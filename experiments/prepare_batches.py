@@ -58,6 +58,29 @@ source activate new_env3
 bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 """
 
+for k in k_values:
+    for metric in distance_metrics:
+        if metric == 'softdtw':
+            for gamma in gamma_values:
+                sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(datasets), k=k, metric=metric, gamma=gamma)
+                with open(f"knn_{k}_{metric}_{gamma}.sbatch", "w") as f:
+                    f.write(sbatch_content_knn)
+        else:
+            sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(datasets), k=k, metric=metric, gamma="")
+            with open(f"knn_{k}_{metric}.sbatch", "w") as f:
+                f.write(sbatch_content_knn)
+
+for metric in distance_metrics:
+    if metric == 'softdtw':
+        for gamma in gamma_values:
+            sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(datasets), metric=metric, gamma=gamma)
+            with open(f"ncc_{metric}_{gamma}.sbatch", "w") as f:
+                f.write(sbatch_content_ncc)
+    else:
+        sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(datasets), metric=metric, gamma="")
+        with open(f"ncc_{metric}.sbatch", "w") as f:
+            f.write(sbatch_content_ncc)
+
 for n_cluster in n_clusters:
     for metric in distance_metrics:
         if metric == 'softdtw':
