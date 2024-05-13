@@ -7,6 +7,7 @@ try:
         import psutil
         import threading
         import logging
+        import numpy as np
         from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
     homogeneity_score, completeness_score, v_measure_score, accuracy_score, f1_score, precision_score, recall_score
         from tslearn.clustering import TimeSeriesKMeans
@@ -30,11 +31,15 @@ try:
         return logger
 
     def run_knn_experiment(dataset_name, k, metric, gamma):
-
+        result = {}
         try:
-            result = None
 
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+
+            # Replace NaN values with 0
+            X_train = np.nan_to_num(X_train)
+            X_test = np.nan_to_num(X_test)
+
             X_train = X_train.reshape(X_train.shape[0], -1)
             X_test = X_test.reshape(X_test.shape[0], -1)
             model = None
@@ -71,7 +76,7 @@ try:
             precision = precision_score(y_test, y_pred, average='macro')
             recall = recall_score(y_test, y_pred, average='macro')
 
-            result = {
+            result.update({
                 'Experiment': 'KNN',
                 'Dataset': dataset_name,
                 'K': k,
@@ -85,20 +90,28 @@ try:
                 'Precision': precision,
                 'Recall': recall,
                 'RAM Usage (GB)': ram_usage
-            }
+            })
 
-            df = pd.DataFrame(result, index=[0])
-            csv_file_path = 'knn_experiment_results.csv'
+            result.update({
+                'Experiment Succeeded': True,
+                'Comment': 'Experiment completed successfully'
+            })
 
-            with lock:
-                if os.path.exists(csv_file_path):
-                    df.to_csv(csv_file_path, mode='a', header=False, index=False)
-                else:
-                    df.to_csv(csv_file_path, mode='w', header=True, index=False)
-
-            logger.info('Experiment completed successfully')
         except Exception as e:
+            result.update({
+                'Experiment Succeeded': False,
+                'Comment': str(e)
+            })
             logger.error(f'An error occurred: {e}', exc_info=True)
+
+        df = pd.DataFrame(result, index=[0])
+        csv_file_path = 'knn_experiment_results.csv'
+
+        with lock:
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
 
         return result
 
@@ -107,7 +120,7 @@ try:
         parser.add_argument('--datasets', type=str, nargs='+', required=True, help='List of datasets to use.')
         parser.add_argument('--k', type=int, required=True, help='K value to use.')
         parser.add_argument('--metric', type=str, required=True, help='Distance metric to use.')
-        parser.add_argument('--gamma', type=float, required=False, help='Gamma value for SoftDTW metric.')
+        parser.add_argument('--gamma', type=float, default=None, help='Gamma value for SoftDTW')
         args = parser.parse_args()
         for dataset in args.datasets:
             result = run_knn_experiment(dataset, args.k, args.metric, args.gamma)
