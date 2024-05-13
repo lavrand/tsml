@@ -86,38 +86,49 @@ bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 
 for group in dataset_groups:
     group = list(group)  # Convert array back to list
-    # TO parallelize we use 'group' instead of 'datasets' in batch preparation code
+    first_dataset = group[0]
+    last_dataset = group[-1]
     for k in k_values:
         for metric in distance_metrics:
             if metric == 'softdtw':
                 for gamma in gamma_values:
                     sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma=gamma)
-                    with open(f"knn_{k}_{metric}_{gamma}.sbatch", "w") as f:
+                    with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}_{gamma}.sbatch", "w") as f:
                         f.write(sbatch_content_knn)
             else:
                 sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma="")
-                with open(f"knn_{k}_{metric}.sbatch", "w") as f:
+                with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}.sbatch", "w") as f:
                     f.write(sbatch_content_knn)
 
-    for metric in distance_metrics:
-        if metric == 'softdtw':
-            for gamma in gamma_values:
-                sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma=gamma)
-                with open(f"ncc_{metric}_{gamma}.sbatch", "w") as f:
-                    f.write(sbatch_content_ncc)
-        else:
-            sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma="")
-            with open(f"ncc_{metric}.sbatch", "w") as f:
-                f.write(sbatch_content_ncc)
-
-    for n_cluster in n_clusters:
+    for group in dataset_groups:
+        group = list(group)  # Convert array back to list
+        first_dataset = group[0]
+        last_dataset = group[-1]
         for metric in distance_metrics:
             if metric == 'softdtw':
                 for gamma in gamma_values:
-                    sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma=gamma)
-                    with open(f"clustering_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
-                        f.write(sbatch_content_clustering)
+                    sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric,
+                                                                    gamma=gamma)
+                    with open(f"ncc_{first_dataset}_{last_dataset}_{metric}_{gamma}.sbatch", "w") as f:
+                        f.write(sbatch_content_ncc)
             else:
-                sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma="")
-                with open(f"clustering_{n_cluster}_{metric}.sbatch", "w") as f:
-                    f.write(sbatch_content_clustering)
+                sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma="")
+                with open(f"ncc_{first_dataset}_{last_dataset}_{metric}.sbatch", "w") as f:
+                    f.write(sbatch_content_ncc)
+
+        for n_cluster in n_clusters:
+            for metric in distance_metrics:
+                if metric == 'softdtw':
+                    for gamma in gamma_values:
+                        sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group),
+                                                                                      n_cluster=n_cluster,
+                                                                                      metric=metric, gamma=gamma)
+                        with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}_{gamma}.sbatch",
+                                  "w") as f:
+                            f.write(sbatch_content_clustering)
+                else:
+                    sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group),
+                                                                                  n_cluster=n_cluster, metric=metric,
+                                                                                  gamma="")
+                    with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}.sbatch", "w") as f:
+                        f.write(sbatch_content_clustering)
