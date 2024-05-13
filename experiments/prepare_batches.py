@@ -4,17 +4,17 @@ datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CB
 # datasets = ['CBF']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
-gamma_values = [0.1, 1, 10]
+gamma_values = [1]
 n_clusters = [3]
 
 sbatch_template_knn = """#!/bin/bash
 #SBATCH --partition main
-#SBATCH --time 1-23:50:00
+#SBATCH --time 6-23:50:00
 #SBATCH --job-name knn_{k}_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/knn_{k}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=8G
+#SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
@@ -26,12 +26,12 @@ bash run_knn.sh {datasets} {k} {metric} {gamma}
 
 sbatch_template_ncc = """#!/bin/bash
 #SBATCH --partition main
-#SBATCH --time 1-23:50:00
+#SBATCH --time 6-23:50:00
 #SBATCH --job-name ncc_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/ncc_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=8G
+#SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
@@ -43,12 +43,12 @@ bash run_ncc.sh {datasets} {metric} {gamma}
 
 sbatch_template_clustering = """#!/bin/bash
 #SBATCH --partition main
-#SBATCH --time 1-23:50:00
+#SBATCH --time 6-23:50:00
 #SBATCH --job-name clustering_{n_cluster}_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/clustering_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mem=8G
+#SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
