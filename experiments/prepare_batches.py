@@ -78,8 +78,8 @@ sbatch_template_clustering = """#!/bin/bash
 #SBATCH --output /cs_storage/andreyl/pancake/clustering_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=FAIL
-#SBATCH --mem=4G
-#SBATCH --cpus-per-task=4
+#SBATCH --mem=20G
+#SBATCH --cpus-per-task=10
 #SBATCH --tasks=1
 
 module load anaconda
