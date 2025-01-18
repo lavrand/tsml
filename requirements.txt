@@ -3,3 +3,5 @@ psutil
 scikit-learn
 numpy
 tslearn
+filelock
+numpy
