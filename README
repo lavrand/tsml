@@ -40,6 +40,11 @@ SoftDTW (gamma=10)
 
 4. Run the batches on the cluster:
 
+    Submitting a Job
+        sbatch <batch file name>
+        ❖ Conda users: Make sure you submit the job while virtual environment deactivated on the
+        manager node (‘conda deactivate’)! Otherwise, the job will not run because of failing imports.
+
     ```bash
     python3 run.py
     ```
