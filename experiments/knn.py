@@ -8,12 +8,11 @@ try:
         import threading
         import logging
         import numpy as np
-        from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score, adjusted_mutual_info_score, \
-    homogeneity_score, completeness_score, v_measure_score, accuracy_score, f1_score, precision_score, recall_score
-        from tslearn.clustering import TimeSeriesKMeans
+        from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
         from tslearn.datasets import UCR_UEA_datasets
         from tslearn.metrics import dtw, soft_dtw
         from sklearn.neighbors import KNeighborsClassifier
+        from filelock import FileLock
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
 
@@ -33,7 +32,6 @@ try:
     def run_knn_experiment(dataset_name, k, metric, gamma):
         result = {}
         try:
-
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
             # Replace NaN values with 0
@@ -106,8 +104,9 @@ try:
 
         df = pd.DataFrame(result, index=[0])
         csv_file_path = 'knn_experiment_results.csv'
+        lock_path = csv_file_path + '.lock'
 
-        with lock:
+        with FileLock(lock_path):
             if os.path.exists(csv_file_path):
                 df.to_csv(csv_file_path, mode='a', header=False, index=False)
             else:

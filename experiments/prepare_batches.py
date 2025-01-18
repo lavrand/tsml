@@ -20,7 +20,11 @@ import numpy as np
 #             'HandMovementDirection', 'Handwriting', 'Heartbeat', 'InsectWingbeat', 'JapaneseVowels', 'Libras', 'LSST',
 #             'MotorImagery', 'NATOPS', 'PenDigits', 'PEMS-SF', 'Phoneme', 'RacketSports', 'SelfRegulationSCP1',
 #             'SelfRegulationSCP2', 'SpokenArabicDigits', 'StandWalkJump', 'UWaveGestureLibrary']
-datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CBF', 'ChlorineConcentration']
+
+# datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CBF', 'ChlorineConcentration']
+
+datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly']
+
 N_PARALLEL_DATASETS = 8
 
 # Split the datasets into N_PARALLEL_DATASETS groups
@@ -39,7 +43,7 @@ sbatch_template_knn = """#!/bin/bash
 #SBATCH --job-name knn_{k}_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/knn_{k}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
-#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-type=FAIL
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
@@ -56,7 +60,7 @@ sbatch_template_ncc = """#!/bin/bash
 #SBATCH --job-name ncc_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/ncc_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
-#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-type=FAIL
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
@@ -73,7 +77,7 @@ sbatch_template_clustering = """#!/bin/bash
 #SBATCH --job-name clustering_{n_cluster}_{metric}_{gamma}
 #SBATCH --output /cs_storage/andreyl/pancake/clustering_{n_cluster}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
-#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-type=FAIL
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1

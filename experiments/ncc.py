@@ -12,6 +12,7 @@ try:
         from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
         from tslearn.datasets import UCR_UEA_datasets
         from tslearn.metrics import dtw, soft_dtw
+        from filelock import FileLock
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
 
@@ -103,8 +104,9 @@ try:
 
         df = pd.DataFrame(result, index=[0])
         csv_file_path = 'ncc_experiment_results.csv'
+        lock_path = csv_file_path + '.lock'
 
-        with lock:
+        with FileLock(lock_path):
             if os.path.exists(csv_file_path):
                 df.to_csv(csv_file_path, mode='a', header=False, index=False)
             else:

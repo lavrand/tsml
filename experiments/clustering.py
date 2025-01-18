@@ -13,8 +13,7 @@ try:
         from tslearn.clustering import TimeSeriesKMeans
         from tslearn.datasets import UCR_UEA_datasets
         from tslearn.metrics import dtw, soft_dtw
-        from tslearn.metrics import dtw, soft_dtw
-        from tslearn.utils import to_time_series_dataset
+        from filelock import FileLock
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
 
@@ -34,7 +33,6 @@ try:
     def run_clustering_experiment(dataset_name, n_clusters, metric='euclidean', gamma=None):
         result = {}
         try:
-
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
             # Replace NaN values with 0
@@ -117,8 +115,9 @@ try:
 
         df = pd.DataFrame(result, index=[0])
         csv_file_path = 'clustering_experiment_results.csv'
+        lock_path = csv_file_path + '.lock'
 
-        with lock:
+        with FileLock(lock_path):
             if os.path.exists(csv_file_path):
                 df.to_csv(csv_file_path, mode='a', header=False, index=False)
             else:
