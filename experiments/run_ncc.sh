@@ -1,7 +1,8 @@
 #!/bin/bash
 
+module load anaconda
 # Activate the Conda environment
-source activate new_env3
+source activate tsml
 
 # Split the input string into an array using '_' as the delimiter
 IFS='_' read -ra datasets <<< "$1"
