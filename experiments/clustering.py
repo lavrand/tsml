@@ -16,6 +16,7 @@ try:
         from filelock import FileLock
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
+        logger = None
 
     # Create a global lock
     lock = threading.Lock()
@@ -29,7 +30,7 @@ try:
         logger.setLevel(logging.INFO)
         handler = logging.FileHandler(log_file_path)
         handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger
@@ -115,7 +116,8 @@ try:
                 'Experiment Succeeded': False,
                 'Comment': str(e)
             })
-            logger.error(f'An error occurred: {e}', exc_info=True)
+            if logger:
+                logger.error(f'An error occurred: {e}', exc_info=True)
 
         df = pd.DataFrame(result, index=[0])
         csv_file_path = 'clustering_experiment_results.csv'
