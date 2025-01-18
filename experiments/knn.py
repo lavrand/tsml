@@ -100,12 +100,15 @@ try:
                 'Comment': 'Experiment completed successfully'
             })
 
+            logger.info('Test finished successfully')
+
         except Exception as e:
             result.update({
                 'Experiment Succeeded': False,
                 'Comment': str(e)
             })
-            logger.error(f'An error occurred: {e}', exc_info=True)
+            if logger:
+                logger.error(f'An error occurred: {e}', exc_info=True)
 
         df = pd.DataFrame(result, index=[0])
 

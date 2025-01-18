@@ -111,6 +111,8 @@ try:
                 'Comment': 'Experiment completed successfully'
             })
 
+            logger.info('Test finished successfully')
+
         except Exception as e:
             result.update({
                 'Experiment Succeeded': False,
