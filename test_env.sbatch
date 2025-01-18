@@ -6,10 +6,6 @@
 #SBATCH --mem=4G
 #SBATCH --cpus-per-task=4
 
-### Print some data to output file ###
-echo "SLURM_JOBID”=$SLURM_JOBID
-echo "SLURM_JOB_NODELIST"=$SLURM_JOB_NODELIST
-
 # Load the Anaconda module
 module load anaconda
 
