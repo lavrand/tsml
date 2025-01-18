@@ -1,6 +1,13 @@
 # Time Series Classification Experiments
 
 This project contains a series of experiments for time series classification using different methods such as K-Nearest Neighbors (KNN), Nearest Centroid Classifier (NCC), and Clustering.
+We need the KNN results for all datasets (total of 128).
+The methods are:
+Euclidean
+DTW
+SoftDTW (gamma=0.1)
+SoftDTW (gamma=1)
+SoftDTW (gamma=10)
 
 ## Setup
 

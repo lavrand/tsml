@@ -4,8 +4,8 @@ import subprocess
 datasets = ['CBF']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
-# gamma_values = [0.1, 1, 10]
-gamma_values = [1]
+gamma_values = [0.1, 1, 10]
+# gamma_values = [1]
 n_clusters = [4]
 
 for dataset in datasets:

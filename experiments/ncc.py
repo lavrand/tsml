@@ -9,7 +9,7 @@ try:
         import logging
         import numpy as np
         from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-        from sklearn.neighbors import NearestCentroid
+        from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
         from tslearn.datasets import UCR_UEA_datasets
         from tslearn.metrics import dtw, soft_dtw
     except Exception as e:
@@ -31,7 +31,6 @@ try:
     def run_ncc_experiment(dataset_name, metric='euclidean', gamma=None):
         result = {}
         try:
-
             X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
 
             # Replace NaN values with 0
@@ -46,9 +45,9 @@ try:
             if metric == 'euclidean':
                 model = NearestCentroid()
             elif metric == 'dtw':
-                model = NearestCentroid(metric=dtw)
+                model = KNeighborsClassifier(n_neighbors=1, metric=dtw)
             elif metric == 'softdtw' and gamma is not None:
-                model = NearestCentroid(metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+                model = KNeighborsClassifier(n_neighbors=1, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
 
             if model is None:
                 raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
