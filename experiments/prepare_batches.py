@@ -49,7 +49,7 @@ sbatch_template_knn = """#!/bin/bash
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env3
+source activate tsml
 
 bash run_knn.sh {datasets} {k} {metric} {gamma}
 """
@@ -66,7 +66,7 @@ sbatch_template_ncc = """#!/bin/bash
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env3
+source activate tsml
 
 bash run_ncc.sh {datasets} {metric} {gamma}
 """
@@ -83,7 +83,7 @@ sbatch_template_clustering = """#!/bin/bash
 #SBATCH --tasks=1
 
 module load anaconda
-source activate new_env3
+source activate tsml
 
 bash run_clustering.sh {datasets} {n_cluster} {metric} {gamma}
 """
