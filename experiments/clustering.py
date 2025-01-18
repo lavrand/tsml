@@ -21,11 +21,15 @@ try:
     lock = threading.Lock()
 
     def setup_logger(dataset, n_clusters, metric, gamma):
+        log_dir = 'log'
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, f'clustering_{dataset}_{n_clusters}_{metric}_{gamma}.log')
+
         logger = logging.getLogger(f'clustering_{dataset}_{n_clusters}_{metric}_{gamma}')
         logger.setLevel(logging.INFO)
-        handler = logging.FileHandler(f'clustering_{dataset}_{n_clusters}_{metric}_{gamma}.log')
+        handler = logging.FileHandler(log_file_path)
         handler.setLevel(logging.INFO)
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s')
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         return logger

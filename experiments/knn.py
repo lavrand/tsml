@@ -20,9 +20,13 @@ try:
     lock = threading.Lock()
 
     def setup_logger(dataset, k, metric, gamma):
+        log_dir = 'log'
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, f'knn_{dataset}_{k}_{metric}_{gamma}.log')
+
         logger = logging.getLogger(f'knn_{dataset}_{k}_{metric}_{gamma}')
         logger.setLevel(logging.INFO)
-        handler = logging.FileHandler(f'knn_{dataset}_{k}_{metric}_{gamma}.log')
+        handler = logging.FileHandler(log_file_path)
         handler.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
@@ -103,7 +107,14 @@ try:
             logger.error(f'An error occurred: {e}', exc_info=True)
 
         df = pd.DataFrame(result, index=[0])
-        csv_file_path = 'knn_experiment_results.csv'
+
+        # Define the directory and file path
+        csv_dir = 'results'
+        csv_file_path = os.path.join(csv_dir, 'knn_experiment_results.csv')
+
+        # Create the directory if it doesn't exist
+        os.makedirs(csv_dir, exist_ok=True)
+
         lock_path = csv_file_path + '.lock'
 
         with FileLock(lock_path):
