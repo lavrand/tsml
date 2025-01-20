@@ -1,6 +1,32 @@
 import os
 import numpy as np
 
+# batch 1 (33)
+datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
+    'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
+      'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
+         'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
+          'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
+            'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
+             'FreezerRegularTrain']
+
+# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
+#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
+#       'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
+#          'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
+#           'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
+#             'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
+#              'FreezerRegularTrain', 'FreezerSmallTrain',
+#                 'Lightning7', 'ToeSegmentation2', 'GestureMidAirD1', 'GestureMidAirD2', 'GestureMidAirD3',
+#                   'PickupGestureWiimoteZ', 'AllGestureWiimoteX', 'AllGestureWiimoteY', 'AllGestureWiimoteZ', 'ShakeGestureWiimoteZ', 'Symbols', 'Yoga',
+#                     'OSULeaf', 'Meat', 'GesturePebbleZ1', 'GesturePebbleZ2',  'FordA', 'FordB',
+#                        'Herring', 'OliveOil', 'InsectEPGRegularTrain', 'InsectEPGSmallTrain',
+#                         'Lightning2', 'LargeKitchenAppliances', 'RefrigerationDevices',
+#                           'NonInvasiveFetalECGThorax1', 'NonInvasiveFetalECGThorax2', 'Worms', 'WormsTwoClass', 'UWaveGestureLibraryAll', 'Mallat',
+#                             'MixedShapesSmallTrain', 'Phoneme', 'StarlightCurves', 'Haptics', 'EOGHorizontalSignal', 'EOGVerticalSignal', 'PLAID',
+#                               'ACSF1', 'SemgHandGenderCh2', 'SemgHandMovementCh2', 'SemgHandSubjectCh2', 'EthanolLevel', 'InlineSkate',
+#                                 'HouseTwenty', 'PigAirwayPressure', 'PigArtPressure', 'PigCVP', 'HandOutlines', 'Rock']
+
 # datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CBF', 'ChlorineConcentration',
             # 'CinCECGTorso', 'Coffee', 'Computers', 'CricketX', 'CricketY', 'CricketZ', 'DiatomSizeReduction',
             # 'DistalPhalanxOutlineCorrect', 'DistalPhalanxOutlineAgeGroup', 'DistalPhalanxTW', 'Earthquakes',
@@ -20,14 +46,6 @@ import numpy as np
             # 'HandMovementDirection', 'Handwriting', 'Heartbeat', 'InsectWingbeat', 'JapaneseVowels', 'Libras', 'LSST',
             # 'MotorImagery', 'NATOPS', 'PenDigits', 'PEMS-SF', 'Phoneme', 'RacketSports', 'SelfRegulationSCP1',
             # 'SelfRegulationSCP2', 'SpokenArabicDigits', 'StandWalkJump', 'UWaveGestureLibrary']
-
-datasets = ['ArticularyWordRecognition', 'BasicMotions', 'CinCECGTorso', 'Cricket',
-     'EigenWorms', 'Epilepsy', 'EthanolConcentration', 'FaceDetection',
-     'FingerMovements', 'HandMovementDirection', 'Handwriting', 'Heartbeat', 'Libras',
-     'LSST', 'MotorImagery', 'NATOPS', 'NonInvasiveFatalECGThorax1',
-     'NonInvasiveFatalECGThorax2', 'PEMS-SF', 'PenDigits', 'RacketSports',
-     'SelfRegulationSCP1', 'SelfRegulationSCP2', 'StandWalkJump', 'StarLightCurves',
-     'UWaveGestureLibrary']
 
 # datasets_grouped = [
 #     ['ArticularyWordRecognition', 'BasicMotions', 'CinCECGTorso', 'Cricket',
@@ -62,7 +80,7 @@ datasets = ['ArticularyWordRecognition', 'BasicMotions', 'CinCECGTorso', 'Cricke
 
 # datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly']
 
-N_PARALLEL_DATASETS = 26
+N_PARALLEL_DATASETS = 33 # * 15 = 495
 
 # Split the datasets into N_PARALLEL_DATASETS groups
 dataset_groups = np.array_split(datasets, N_PARALLEL_DATASETS)
