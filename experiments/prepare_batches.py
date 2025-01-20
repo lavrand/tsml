@@ -2,9 +2,9 @@ import os
 import numpy as np
 
 # batch 1 (10)
-datasets = ['SmoothSubspace', 'Chinatown', 'MelbournePedestrian', 'Crop', 'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf', 'FacesUCR', 'Plane']
+datasets = ['SmoothSubspace', 'Chinatown', 'MelbournePedestrian', 'Crop', 'BME']
 
-N_PARALLEL_DATASETS = 10 # * 15 =
+N_PARALLEL_DATASETS = 5 # * 15 =
 
 # # batch 1 (10)
 # datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
