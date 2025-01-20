@@ -1,10 +1,14 @@
 import os
 import numpy as np
 
-# batch 1 (10)
-datasets = ['SmoothSubspace', 'Chinatown', 'MelbournePedestrian', 'Crop', 'BME']
+# batch ProximalPhalanxTW-FreezerRegularTrain (23)
+datasets = ['ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
+         'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
+          'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
+            'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
+             'FreezerRegularTrain']
 
-N_PARALLEL_DATASETS = 5 # * 15 =
+N_PARALLEL_DATASETS = 23 # * 15 =
 
 # # batch 1 (10)
 # datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
