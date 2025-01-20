@@ -1,108 +1,130 @@
 import os
 import numpy as np
 
-# batch ProximalPhalanxTW-FreezerRegularTrain (23)
-datasets = ['ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
-         'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
-          'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
-            'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
-             'FreezerRegularTrain']
-
-N_PARALLEL_DATASETS = 23 # * 15 =
-
-# # batch 1 (10)
-# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
-#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect']
 
 
-# # batch 1 (33)
-# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
-#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
-#       'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
-#          'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
-#           'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
-#             'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
-#              'FreezerRegularTrain']
 
-# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
-#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
-#       'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
-#          'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
-#           'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
-#             'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
-#              'FreezerRegularTrain', 'FreezerSmallTrain',
-#                 'Lightning7', 'ToeSegmentation2', 'GestureMidAirD1', 'GestureMidAirD2', 'GestureMidAirD3',
-#                   'PickupGestureWiimoteZ', 'AllGestureWiimoteX', 'AllGestureWiimoteY', 'AllGestureWiimoteZ', 'ShakeGestureWiimoteZ', 'Symbols', 'Yoga',
-#                     'OSULeaf', 'Meat', 'GesturePebbleZ1', 'GesturePebbleZ2',  'FordA', 'FordB',
-#                        'Herring', 'OliveOil', 'InsectEPGRegularTrain', 'InsectEPGSmallTrain',
-#                         'Lightning2', 'LargeKitchenAppliances', 'RefrigerationDevices',
-#                           'NonInvasiveFetalECGThorax1', 'NonInvasiveFetalECGThorax2', 'Worms', 'WormsTwoClass', 'UWaveGestureLibraryAll', 'Mallat',
-#                             'MixedShapesSmallTrain', 'Phoneme', 'StarlightCurves', 'Haptics', 'EOGHorizontalSignal', 'EOGVerticalSignal', 'PLAID',
-#                               'ACSF1', 'SemgHandGenderCh2', 'SemgHandMovementCh2', 'SemgHandSubjectCh2', 'EthanolLevel', 'InlineSkate',
-#                                 'HouseTwenty', 'PigAirwayPressure', 'PigArtPressure', 'PigCVP', 'HandOutlines', 'Rock']
 
-# datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CBF', 'ChlorineConcentration',
-            # 'CinCECGTorso', 'Coffee', 'Computers', 'CricketX', 'CricketY', 'CricketZ', 'DiatomSizeReduction',
-            # 'DistalPhalanxOutlineCorrect', 'DistalPhalanxOutlineAgeGroup', 'DistalPhalanxTW', 'Earthquakes',
-            # 'ECG200', 'ECG5000', 'ECGFiveDays', 'ElectricDevices', 'FaceAll', 'FaceFour', 'FacesUCR', 'FiftyWords',
-            # 'Fish', 'FordA', 'FordB', 'GunPoint', 'Ham', 'HandOutlines', 'Haptics', 'Herring', 'InlineSkate',
-            # 'InsectWingbeatSound', 'ItalyPowerDemand', 'LargeKitchenAppliances', 'Lightning2', 'Lightning7',
-            # 'Mallat', 'Meat', 'MedicalImages', 'MiddlePhalanxOutlineCorrect', 'MiddlePhalanxOutlineAgeGroup',
-            # 'MiddlePhalanxTW', 'MoteStrain', 'NonInvasiveFatalECGThorax1', 'NonInvasiveFatalECGThorax2', 'OliveOil',
-            # 'OSULeaf', 'PhalangesOutlinesCorrect', 'Phoneme', 'Plane', 'ProximalPhalanxOutlineCorrect',
-            # 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxTW', 'RefrigerationDevices', 'ScreenType', 'ShapeletSim',
-            # 'ShapesAll', 'SmallKitchenAppliances', 'SonyAIBORobotSurface1', 'SonyAIBORobotSurface2', 'StarLightCurves',
-            # 'Strawberry', 'SwedishLeaf', 'Symbols', 'SyntheticControl', 'ToeSegmentation1', 'ToeSegmentation2',
-            # 'Trace', 'TwoLeadECG', 'TwoPatterns', 'UWaveGestureLibraryX', 'UWaveGestureLibraryY',
-            # 'UWaveGestureLibraryZ', 'UWaveGestureLibraryAll', 'Wafer', 'Wine', 'WordSynonyms', 'Worms', 'WormsTwoClass',
-            # 'Yoga', 'ArticularyWordRecognition', 'AtrialFibrillation', 'BasicMotions', 'CharacterTrajectories', 'Cricket',
-            # 'DuckDuckGeese', 'EigenWorms', 'Epilepsy', 'EthanolConcentration', 'ERing', 'FaceDetection', 'FingerMovements',
-            # 'HandMovementDirection', 'Handwriting', 'Heartbeat', 'InsectWingbeat', 'JapaneseVowels', 'Libras', 'LSST',
-            # 'MotorImagery', 'NATOPS', 'PenDigits', 'PEMS-SF', 'Phoneme', 'RacketSports', 'SelfRegulationSCP1',
-            # 'SelfRegulationSCP2', 'SpokenArabicDigits', 'StandWalkJump', 'UWaveGestureLibrary']
+N_PARALLEL_DATASETS = 20
 
-# datasets_grouped = [
-#     ['ArticularyWordRecognition', 'BasicMotions', 'CinCECGTorso', 'Cricket',
-#      'EigenWorms', 'Epilepsy', 'EthanolConcentration', 'FaceDetection',
-#      'FingerMovements', 'HandMovementDirection', 'Handwriting', 'Heartbeat', 'Libras'],
-#
-#     ['LSST', 'MotorImagery', 'NATOPS', 'NonInvasiveFatalECGThorax1',
-#      'NonInvasiveFatalECGThorax2', 'PEMS-SF', 'PenDigits', 'RacketSports',
-#      'SelfRegulationSCP1', 'SelfRegulationSCP2', 'StandWalkJump', 'StarLightCurves',
-#      'UWaveGestureLibrary']
+datasets = [
+    'ACSF1',
+    'AllGestureWiimoteX',
+    'AllGestureWiimoteY',
+    'AllGestureWiimoteZ',
+    'BME',
+    'Crop',
+    'DodgerLoopDay',
+    'DodgerLoopGame',
+    'DodgerLoopWeekend',
+    'EOGHorizontalSignal',
+    'EthanolLevel',
+    'FacesUCR',
+    'FordA',
+    'FordB',
+    'FreezerRegularTrain',
+    'FreezerSmallTrain',
+    'Fungi',
+    'GestureMidAirD1',
+    'GestureMidAirD2',
+    'GestureMidAirD3',
+]
+
+
+
+# datasets = [
+#     'ACSF1',
+#     'AllGestureWiimoteX',
+#     'AllGestureWiimoteY',
+#     'AllGestureWiimoteZ',
+#     'BME',
+#     # 'Chinatown',
+#     'Crop',
+#     'DodgerLoopDay',
+#     'DodgerLoopGame',
+#     'DodgerLoopWeekend',
+#     'EOGHorizontalSignal',
+#     'EOGVerticalSignal',
+#     'EthanolLevel',
+#     'FacesUCR',
+#     'FordA',
+#     'FordB',
+#     'FreezerRegularTrain',
+#     'FreezerSmallTrain',
+#     'Fungi',
+#     'GestureMidAirD1',
+#     'GestureMidAirD2',
+#     'GestureMidAirD3',
+#     'GesturePebbleZ1',
+#     'GesturePebbleZ2',
+#     'GunPointAgeSpan',
+#     'GunPointMaleVersusFemale',
+#     'GunPointOldVersusYoung',
+#     'HandOutlines',
+#     'Haptics',
+#     'Herring',
+#     'HouseTwenty',
+#     'InlineSkate',
+#     'InsectEPGRegularTrain',
+#     'InsectEPGSmallTrain',
+#     # 'InsectWingbeatSound',
+#     'ItalyPowerDemand',
+#     'LargeKitchenAppliances',
+#     'Lightning2',
+#     'Lightning7',
+#     'Mallat',
+#     'Meat',
+#     'MedicalImages',
+#     # 'MelbournePedestrian',
+#     'MiddlePhalanxOutlineCorrect',
+#     'MixedShapesSmallTrain',
+#     'NonInvasiveFetalECGThorax1',
+#     'NonInvasiveFetalECGThorax2',
+#     'OSULeaf',
+#     'OliveOil',
+#     'PLAID',
+#     'PhalangesOutlinesCorrect',
+#     'Phoneme',
+#     'PickupGestureWiimoteZ',
+#     'PigAirwayPressure',
+#     'PigArtPressure',
+#     'PigCVP',
+#     # 'Plane',
+#     'PowerCons',
+#     'ProximalPhalanxOutlineAgeGroup',
+#     'ProximalPhalanxOutlineCorrect',
+#     # 'ProximalPhalanxTW',
+#     'RefrigerationDevices',
+#     'Rock',
+#     'SemgHandGenderCh2',
+#     'SemgHandMovementCh2',
+#     'SemgHandSubjectCh2',
+#     'ShakeGestureWiimoteZ',
+#     # 'SmoothSubspace',
+#     'StarlightCurves',
+#     # 'Strawberry',
+#     # 'SwedishLeaf',
+#     'Symbols',
+#     'SyntheticControl',
+#     # 'ToeSegmentation1',
+#     'ToeSegmentation2',
+#     # 'Trace',
+#     'UMD',
+#     'UWaveGestureLibraryAll',
+#     'Wafer',
+#     # 'Wine',
+#     # 'WordSynonyms',
+#     'Worms',
+#     'WormsTwoClass',
+#     'Yoga'
 # ]
-
-# ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl', 'SonyAIBORobotSurface2',
-#   'SonyAIBORobotSurface1', 'DistalPhalanxOutlineAgeGroup', 'DistalPhalanxOutlineCorrect', 'DistalPhalanxTW', 'MiddlePhalanxOutlineAgeGroup',
-#     'MiddlePhalanxOutlineCorrect', 'MiddlePhalanxTW', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
-#       'ProximalPhalanxTW', 'TwoLeadECG', 'MoteStrain', 'ECG200', 'ElectricDevices', 'MedicalImages', 'BME', 'CBF', 'SwedishLeaf', 'TwoPatterns',
-#         'FaceAll', 'FacesUCR', 'ECGFiveDays', 'ECG5000', 'Plane', 'PowerCons', 'GunPoint', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
-#           'GunPointOldVersusYoung', 'UMD', 'Wafer', 'ChlorineConcentration', 'Adiac', 'Fungi', 'Wine', 'Strawberry', 'ArrowHead', 'InsectWingbeatSound',
-#             'FiftyWords', 'WordSynonyms', 'Trace', 'ToeSegmentation1', 'Coffee', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend', 'CricketX',
-#               'CricketY', 'CricketZ', 'FreezerRegularTrain', 'FreezerSmallTrain', 'UWaveGestureLibraryX', 'UWaveGestureLibraryY', 'UWaveGestureLibraryZ',
-#                 'Lightning7', 'ToeSegmentation2', 'DiatomSizeReduction', 'FaceFour', 'GestureMidAirD1', 'GestureMidAirD2', 'GestureMidAirD3',
-#                   'PickupGestureWiimoteZ', 'AllGestureWiimoteX', 'AllGestureWiimoteY', 'AllGestureWiimoteZ', 'ShakeGestureWiimoteZ', 'Symbols', 'Yoga',
-#                     'OSULeaf', 'Ham', 'Meat', 'GesturePebbleZ1', 'GesturePebbleZ2', 'Fish', 'Beef', 'FordA', 'FordB', 'ShapeletSim', 'BeetleFly',
-#                       'BirdChicken', 'Earthquakes', 'Herring', 'ShapesAll', 'OliveOil', 'Car', 'InsectEPGRegularTrain', 'InsectEPGSmallTrain',
-#                         'Lightning2', 'Computers', 'LargeKitchenAppliances', 'RefrigerationDevices', 'ScreenType', 'SmallKitchenAppliances',
-#                           'NonInvasiveFetalECGThorax1', 'NonInvasiveFetalECGThorax2', 'Worms', 'WormsTwoClass', 'UWaveGestureLibraryAll', 'Mallat',
-#                             'MixedShapesSmallTrain', 'Phoneme', 'StarlightCurves', 'Haptics', 'EOGHorizontalSignal', 'EOGVerticalSignal', 'PLAID',
-#                               'ACSF1', 'SemgHandGenderCh2', 'SemgHandMovementCh2', 'SemgHandSubjectCh2', 'CinCECGtorso', 'EthanolLevel', 'InlineSkate',
-#                                 'HouseTwenty', 'PigAirwayPressure', 'PigArtPressure', 'PigCVP', 'HandOutlines', 'Rock']
-
-# datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly', 'BirdChicken', 'Car', 'CBF', 'ChlorineConcentration']
-
-# datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly']
-
 
 
 # Split the datasets into N_PARALLEL_DATASETS groups
 dataset_groups = np.array_split(datasets, N_PARALLEL_DATASETS)
 
-# datasets = ['CBF']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
-# gamma_values = [1]
 gamma_values = [0.1, 1, 10]
 n_clusters = [3]
 
