@@ -1,14 +1,19 @@
 import os
 import numpy as np
 
-# batch 1 (33)
+# batch 1 (10)
 datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
-    'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
-      'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
-         'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
-          'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
-            'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
-             'FreezerRegularTrain']
+    'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect']
+
+
+# # batch 1 (33)
+# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
+#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
+#       'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf',
+#          'FacesUCR', 'Plane', 'PowerCons', 'GunPointAgeSpan', 'GunPointMaleVersusFemale',
+#           'GunPointOldVersusYoung', 'UMD', 'Wafer', 'Fungi', 'Wine', 'Strawberry', 'InsectWingbeatSound',
+#             'WordSynonyms', 'Trace', 'ToeSegmentation1', 'DodgerLoopDay', 'DodgerLoopGame', 'DodgerLoopWeekend',
+#              'FreezerRegularTrain']
 
 # datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
 #     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect',
@@ -99,7 +104,7 @@ sbatch_template_knn = """#!/bin/bash
 #SBATCH --output /cs_storage/andreyl/pancake/knn_{k}_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=FAIL
-#SBATCH --mem=4G
+#SBATCH --mem=10G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
