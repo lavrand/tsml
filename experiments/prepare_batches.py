@@ -2,8 +2,13 @@ import os
 import numpy as np
 
 # batch 1 (10)
-datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
-    'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect']
+datasets = ['SmoothSubspace', 'Chinatown', 'MelbournePedestrian', 'Crop', 'ProximalPhalanxTW', 'MedicalImages', 'BME', 'SwedishLeaf', 'FacesUCR', 'Plane']
+
+N_PARALLEL_DATASETS = 10 # * 15 =
+
+# # batch 1 (10)
+# datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestrian', 'Crop', 'SyntheticControl',
+#     'MiddlePhalanxOutlineCorrect', 'PhalangesOutlinesCorrect', 'ProximalPhalanxOutlineAgeGroup', 'ProximalPhalanxOutlineCorrect']
 
 
 # # batch 1 (33)
@@ -85,7 +90,7 @@ datasets = ['SmoothSubspace', 'Chinatown', 'ItalyPowerDemand', 'MelbournePedestr
 
 # datasets = ['Adiac', 'ArrowHead', 'Beef', 'BeetleFly']
 
-N_PARALLEL_DATASETS = 33 # * 15 = 495
+
 
 # Split the datasets into N_PARALLEL_DATASETS groups
 dataset_groups = np.array_split(datasets, N_PARALLEL_DATASETS)
