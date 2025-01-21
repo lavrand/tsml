@@ -20,8 +20,8 @@ try:
         import numpy as np
         from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
         from tslearn.datasets import UCR_UEA_datasets
-        from tslearn.metrics import dtw, soft_dtw
-        from sklearn.neighbors import KNeighborsClassifier
+        from tslearn.neighbors import KNeighborsTimeSeriesClassifier
+        from tslearn.preprocessing import TimeSeriesResampler
         from filelock import FileLock
     except Exception as e:
         print(f"An error occurred while importing modules: {e}")
@@ -44,6 +44,7 @@ try:
         logger.addHandler(handler)
         return logger
 
+
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
         ucr_uea = UCR_UEA_datasets(use_cache=True)
         for attempt in range(retries):
@@ -51,11 +52,26 @@ try:
                 X_train, y_train, X_test, y_test = ucr_uea.load_dataset(dataset_name)
                 return X_train, y_train, X_test, y_test
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} load dataset {dataset_name} failed: {e}")
+                logger.error(f"Attempt {attempt + 1} to load dataset {dataset_name} failed: {e}")
                 if attempt < retries - 1:
                     time.sleep(delay)
                 else:
                     raise
+
+
+    def preprocess_features(X_train, X_test, desired_length=None):
+        # Replace NaN values with 0
+        X_train = np.nan_to_num(X_train)
+        X_test = np.nan_to_num(X_test)
+
+        # If a desired length is specified, resample time series to that length
+        if desired_length is not None:
+            resampler = TimeSeriesResampler(sz=desired_length)
+            X_train = resampler.fit_transform(X_train)
+            X_test = resampler.transform(X_test)
+
+        return X_train, X_test
+
 
     def run_knn_experiment(dataset_name, k, metric, gamma):
         result = {}
@@ -63,20 +79,21 @@ try:
             logger = setup_logger(dataset_name, k, metric, gamma)
             X_train, y_train, X_test, y_test = load_dataset_with_retry(dataset_name, logger)
 
-            # Replace NaN values with 0
-            X_train = np.nan_to_num(X_train)
-            X_test = np.nan_to_num(X_test)
+            # Determine the desired length (e.g., the median length of the training set)
+            lengths = [ts.shape[0] for ts in X_train]
+            desired_length = int(np.median(lengths))
 
-            X_train = X_train.reshape(X_train.shape[0], -1)
-            X_test = X_test.reshape(X_test.shape[0], -1)
+            # Preprocess features
+            X_train, X_test = preprocess_features(X_train, X_test, desired_length)
+
             model = None
 
             if metric == 'euclidean':
-                model = KNeighborsClassifier(n_neighbors=k)
+                model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric="euclidean")
             elif metric == 'dtw':
-                model = KNeighborsClassifier(n_neighbors=k, metric=dtw)
+                model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric="dtw")
             elif metric == 'softdtw' and gamma is not None:
-                model = KNeighborsClassifier(n_neighbors=k, metric=lambda x, y: soft_dtw(x, y, gamma=gamma))
+                model = KNeighborsTimeSeriesClassifier(n_neighbors=k, metric="softdtw", metric_params={"gamma": gamma})
 
             if model is None:
                 raise ValueError(f"Invalid metric: {metric} or gamma: {gamma}")
@@ -127,7 +144,7 @@ try:
 
         except TimeoutError as e:
             result.update({
-                'Experiment Succeeded': True,
+                'Experiment Succeeded': False,
                 'Comment': str(e)
             })
             if logger:
