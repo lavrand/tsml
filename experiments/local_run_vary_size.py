@@ -1,7 +1,7 @@
 import subprocess
 import concurrent.futures
 
-datasets = ['AllGestureWiimoteX']
+datasets = ['GesturePebbleZ2']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
 gamma_values = [0.1, 1, 10]

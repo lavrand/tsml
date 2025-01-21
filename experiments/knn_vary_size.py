@@ -44,12 +44,16 @@ try:
         logger.addHandler(handler)
         return logger
 
-
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
         ucr_uea = UCR_UEA_datasets(use_cache=True)
         for attempt in range(retries):
             try:
                 X_train, y_train, X_test, y_test = ucr_uea.load_dataset(dataset_name)
+
+                # Ensure consistent feature dimensions
+                target_length = int(np.median([len(x) for x in X_train]))
+                X_train, X_test = preprocess_features(X_train, X_test, target_length)
+
                 return X_train, y_train, X_test, y_test
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} to load dataset {dataset_name} failed: {e}")
@@ -59,19 +63,17 @@ try:
                     raise
 
 
-    def preprocess_features(X_train, X_test, desired_length=None):
-        # Replace NaN values with 0
+    def preprocess_features(X_train, X_test, target_length):
+        # Resample to ensure consistent length
+        resampler = TimeSeriesResampler(sz=target_length)
+        X_train = resampler.fit_transform(X_train)
+        X_test = resampler.transform(X_test)
+
+        # Replace NaNs with zeros
         X_train = np.nan_to_num(X_train)
         X_test = np.nan_to_num(X_test)
 
-        # If a desired length is specified, resample time series to that length
-        if desired_length is not None:
-            resampler = TimeSeriesResampler(sz=desired_length)
-            X_train = resampler.fit_transform(X_train)
-            X_test = resampler.transform(X_test)
-
         return X_train, X_test
-
 
     def run_knn_experiment(dataset_name, k, metric, gamma):
         result = {}
