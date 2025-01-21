@@ -1,7 +1,7 @@
 import subprocess
 import concurrent.futures
 
-datasets = ['Crop']
+datasets = ['AllGestureWiimoteX']
 k_values = [1, 3, 5]
 distance_metrics = ['euclidean', 'dtw', 'softdtw']
 gamma_values = [0.1, 1, 10]
@@ -17,9 +17,9 @@ for dataset in datasets:
         for metric in distance_metrics:
             if metric == 'softdtw':
                 for gamma in gamma_values:
-                    commands.append(['python3', 'knn.py', '--dataset', dataset, '--k', str(k), '--metric', metric, '--gamma', str(gamma)])
+                    commands.append(['python3', 'knn_vary_size.py', '--dataset', dataset, '--k', str(k), '--metric', metric, '--gamma', str(gamma)])
             else:
-                commands.append(['python3', 'knn.py', '--dataset', dataset, '--k', str(k), '--metric', metric])
+                commands.append(['python3', 'knn_vary_size.py', '--dataset', dataset, '--k', str(k), '--metric', metric])
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
     executor.map(run_experiment, commands)
