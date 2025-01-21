@@ -48,6 +48,7 @@ try:
         ucr_uea = UCR_UEA_datasets(use_cache=True)
         for attempt in range(retries):
             try:
+                # Load the dataset
                 X_train, y_train, X_test, y_test = ucr_uea.load_dataset(dataset_name)
 
                 # Ensure consistent feature dimensions
@@ -60,7 +61,9 @@ try:
                 if attempt < retries - 1:
                     time.sleep(delay)
                 else:
-                    raise
+                    raise ValueError(f"Failed to load dataset {dataset_name} after {retries} attempts")
+
+        return None, None, None, None
 
 
     def preprocess_features(X_train, X_test, target_length):
@@ -80,6 +83,9 @@ try:
         try:
             logger = setup_logger(dataset_name, k, metric, gamma)
             X_train, y_train, X_test, y_test = load_dataset_with_retry(dataset_name, logger)
+
+            if X_train is None or y_train is None or X_test is None or y_test is None:
+                raise ValueError(f"Failed to load dataset {dataset_name}")
 
             # Determine the desired length (e.g., the median length of the training set)
             lengths = [ts.shape[0] for ts in X_train]
