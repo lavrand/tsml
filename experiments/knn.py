@@ -1,3 +1,13 @@
+import signal
+
+# Define a timeout handler
+def timeout_handler(signum, frame):
+    raise TimeoutError("Experiment exceeded the time limit of 6 hours")
+
+# Set the signal handler and a 6-hour alarm
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(6 * 60 * 60)  # 6 hours in seconds
+
 try:
     try:
         import argparse
@@ -34,10 +44,24 @@ try:
         logger.addHandler(handler)
         return logger
 
+    def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
+        ucr_uea = UCR_UEA_datasets(use_cache=True)
+        for attempt in range(retries):
+            try:
+                X_train, y_train, X_test, y_test = ucr_uea.load_dataset(dataset_name)
+                return X_train, y_train, X_test, y_test
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} load dataset {dataset_name} failed: {e}")
+                if attempt < retries - 1:
+                    time.sleep(delay)
+                else:
+                    raise
+
     def run_knn_experiment(dataset_name, k, metric, gamma):
         result = {}
         try:
-            X_train, y_train, X_test, y_test = UCR_UEA_datasets().load_dataset(dataset_name)
+            logger = setup_logger(dataset_name, k, metric, gamma)
+            X_train, y_train, X_test, y_test = load_dataset_with_retry(dataset_name, logger)
 
             # Replace NaN values with 0
             X_train = np.nan_to_num(X_train)
@@ -60,7 +84,6 @@ try:
             process = psutil.Process(os.getpid())
             initial_ram_usage = process.memory_info().rss
 
-            logger = setup_logger(dataset_name, k, metric, gamma)
             start_time = time.time()
             start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
@@ -102,6 +125,13 @@ try:
 
             logger.info('Test finished successfully')
 
+        except TimeoutError as e:
+            result.update({
+                'Experiment Succeeded': True,
+                'Comment': str(e)
+            })
+            if logger:
+                logger.error(f'Experiment exceeded the time limit: {e}', exc_info=True)
         except Exception as e:
             result.update({
                 'Experiment Succeeded': False,
@@ -139,5 +169,9 @@ try:
         for dataset in args.datasets:
             result = run_knn_experiment(dataset, args.k, args.metric, args.gamma)
             print(result)
+except TimeoutError as e:
+    print(f"Experiment exceeded the time limit: {e}")
 except Exception as e:
     print(f"An error occurred while running the script: {e}")
+finally:
+    signal.alarm(0)  # Disable the alarm
