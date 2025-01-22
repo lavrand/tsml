@@ -44,17 +44,22 @@ try:
         logger.addHandler(handler)
         return logger
 
-    def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
+
+    def load_dataset_with_retry(dataset_name, logger, retries=5, delay=10, batch_size=100):
         ucr_uea = UCR_UEA_datasets(use_cache=True)
         for attempt in range(retries):
             try:
-                # Load the dataset
+                logger.info(f"Attempting to load dataset {dataset_name} (Attempt {attempt + 1})")
                 X_train, y_train, X_test, y_test = ucr_uea.load_dataset(dataset_name)
 
-                # Ensure consistent feature dimensions
-                target_length = int(np.median([len(x) for x in X_train]))
-                X_train, X_test = preprocess_features(X_train, X_test, target_length)
+                # Log dataset size
+                logger.info(f"Loaded dataset {dataset_name}: {len(X_train)} train samples, {len(X_test)} test samples")
 
+                # Split into batches if necessary
+                if len(X_train) > batch_size:
+                    logger.info(f"Dataset {dataset_name} exceeds batch size. Splitting...")
+                    for batch in range(0, len(X_train), batch_size):
+                        yield X_train[batch:batch + batch_size], y_train[batch:batch + batch_size]
                 return X_train, y_train, X_test, y_test
             except Exception as e:
                 logger.error(f"Attempt {attempt + 1} to load dataset {dataset_name} failed: {e}")
@@ -62,8 +67,6 @@ try:
                     time.sleep(delay)
                 else:
                     raise ValueError(f"Failed to load dataset {dataset_name} after {retries} attempts")
-
-        return None, None, None, None
 
 
     def preprocess_features(X_train, X_test, target_length):
