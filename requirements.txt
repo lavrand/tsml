@@ -5,3 +5,4 @@ numpy
 tslearn
 filelock
 h5py
+sktime
