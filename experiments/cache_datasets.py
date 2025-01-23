@@ -1,4 +1,5 @@
 import os
+import numpy as np
 from sktime.datasets import load_UCR_UEA_dataset
 
 # Define the directory to store cached datasets
@@ -128,15 +129,11 @@ def cache_dataset(dataset_name):
         X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train", return_X_y=True)
         X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test", return_X_y=True)
 
-        # Save datasets to the cache directory
-        dataset_dir = os.path.join(CACHE_DIR, dataset_name)
-        os.makedirs(dataset_dir, exist_ok=True)
-
-        # Save train/test datasets
-        X_train.to_pickle(os.path.join(dataset_dir, "X_train.pkl"))
-        y_train.to_pickle(os.path.join(dataset_dir, "y_train.pkl"))
-        X_test.to_pickle(os.path.join(dataset_dir, "X_test.pkl"))
-        y_test.to_pickle(os.path.join(dataset_dir, "y_test.pkl"))
+        # Convert to a format suitable for serialization
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_train.npy"), X_train)
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_train.npy"), y_train)
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_test.npy"), X_test)
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_test.npy"), y_test)
 
         print(f"Cached dataset: {dataset_name}")
     except Exception as e:

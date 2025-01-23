@@ -49,30 +49,32 @@ try:
 
 
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
-        dataset_dir = os.path.join("cached_datasets", dataset_name)
+        cache_dir = "cached_datasets"
 
-        # Check if the dataset is cached
-        if os.path.exists(dataset_dir):
+        # Check if cached dataset exists
+        if all(
+                os.path.exists(os.path.join(cache_dir, f"{dataset_name}_{split}.npy"))
+                for split in ["X_train", "y_train", "X_test", "y_test"]
+        ):
             logger.info(f"Loading dataset '{dataset_name}' from cache.")
-            X_train = pd.read_pickle(os.path.join(dataset_dir, "X_train.pkl"))
-            y_train = pd.read_pickle(os.path.join(dataset_dir, "y_train.pkl"))
-            X_test = pd.read_pickle(os.path.join(dataset_dir, "X_test.pkl"))
-            y_test = pd.read_pickle(os.path.join(dataset_dir, "y_test.pkl"))
+            X_train = np.load(os.path.join(cache_dir, f"{dataset_name}_X_train.npy"), allow_pickle=True)
+            y_train = np.load(os.path.join(cache_dir, f"{dataset_name}_y_train.npy"), allow_pickle=True)
+            X_test = np.load(os.path.join(cache_dir, f"{dataset_name}_X_test.npy"), allow_pickle=True)
+            y_test = np.load(os.path.join(cache_dir, f"{dataset_name}_y_test.npy"), allow_pickle=True)
             return X_train, y_train, X_test, y_test
 
-        # If not cached, attempt to download the dataset
+        # Retry downloading the dataset
         for attempt in range(retries):
             try:
                 logger.info(f"Downloading dataset '{dataset_name}' (attempt {attempt + 1})...")
-                X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train")
-                X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test")
+                X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train", return_X_y=True)
+                X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test", return_X_y=True)
 
                 # Cache the dataset locally
-                os.makedirs(dataset_dir, exist_ok=True)
-                X_train.to_pickle(os.path.join(dataset_dir, "X_train.pkl"))
-                y_train.to_pickle(os.path.join(dataset_dir, "y_train.pkl"))
-                X_test.to_pickle(os.path.join(dataset_dir, "X_test.pkl"))
-                y_test.to_pickle(os.path.join(dataset_dir, "y_test.pkl"))
+                np.save(os.path.join(cache_dir, f"{dataset_name}_X_train.npy"), X_train)
+                np.save(os.path.join(cache_dir, f"{dataset_name}_y_train.npy"), y_train)
+                np.save(os.path.join(cache_dir, f"{dataset_name}_X_test.npy"), X_test)
+                np.save(os.path.join(cache_dir, f"{dataset_name}_y_test.npy"), y_test)
 
                 return X_train, y_train, X_test, y_test
             except Exception as e:
