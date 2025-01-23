@@ -1,163 +1,178 @@
-import time
-import numpy as np
-import pandas as pd
-import logging
+import signal
 
-from sktime.classification.distance_based import ShapeDTW
-from sktime.datasets import load_UCR_UEA_dataset
-from sktime.datasets import tsc_dataset_names
+# Define a timeout handler
+def timeout_handler(signum, frame):
+    raise TimeoutError("Experiment exceeded the time limit of 12 hours")
 
-# Setup a basic logging configuration. 
-# You can configure this further (file logs, log levels, etc.) in your main script.
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Set the signal handler and a 12-hour alarm
+signal.signal(signal.SIGALRM, timeout_handler)
+signal.alarm(12 * 60 * 60)  # 12 hours in seconds
 
+try:
+    try:
+        import time
+        import numpy as np
+        import pandas as pd
+        import logging
+        import argparse
+        import os
+        import psutil
+        import threading
+        from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
+        from sktime.classification.distance_based import ShapeDTW
+        from sktime.datasets import load_UCR_UEA_dataset, tsc_dataset_names
+        from filelock import FileLock
+    except Exception as e:
+        print(f"An error occurred while importing modules: {e}")
+        logger = None
 
-def run_shapedtw_on_dataset(
-    dataset_name: str,
-    shape_function: str,
-    subsequence_length: int = 30,
-    n_neighbors: int = 1
-) -> dict:
-    """
-    Runs ShapeDTW on a single dataset with a given shape descriptor,
-    logs relevant information, and returns a dictionary of results.
+    # Setup a basic logging configuration.
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
 
-    Parameters
-    ----------
-    dataset_name : str
-        Name of the UCR dataset.
-    shape_function : str
-        The shape descriptor function to use, e.g., "raw", "hog1d", "derivative", etc.
-    subsequence_length : int, optional
-        The subsequence length for ShapeDTW, by default 30.
-    n_neighbors : int, optional
-        Number of neighbors for the underlying KNN in ShapeDTW, by default 1.
+    # Create a global lock
+    lock = threading.Lock()
 
-    Returns
-    -------
-    dict
-        Dictionary containing dataset name, shape function, accuracy, runtime, 
-        size of train/test sets, etc.
-    """
-    # Load train/test data
-    X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train")
-    X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test")
+    def setup_logger(dataset, shape_function, subsequence_length, n_neighbors):
+        log_dir = 'log'
+        os.makedirs(log_dir, exist_ok=True)
+        log_file_path = os.path.join(log_dir, f'shapedtw_{dataset}_{shape_function}_{subsequence_length}_{n_neighbors}.log')
 
-    # Create the ShapeDTW classifier
-    clf = ShapeDTW(
-        n_neighbors=n_neighbors,
-        subsequence_length=subsequence_length,
-        shape_descriptor_function=shape_function
-        # Additional ShapeDTW params can go here
-    )
+        logger = logging.getLogger(f'shapedtw_{dataset}_{shape_function}_{subsequence_length}_{n_neighbors}')
+        logger.setLevel(logging.INFO)
+        handler = logging.FileHandler(log_file_path)
+        handler.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        return logger
 
-    # Fit and predict
-    start_time = time.time()
-    clf.fit(X_train, y_train)
-    y_pred = clf.predict(X_test)
-    end_time = time.time()
+    def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
+        for attempt in range(retries):
+            try:
+                X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train")
+                X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test")
+                return X_train, y_train, X_test, y_test
+            except Exception as e:
+                logger.error(f"Attempt {attempt + 1} to load dataset {dataset_name} failed: {e}")
+                if attempt < retries - 1:
+                    time.sleep(delay)
+                else:
+                    raise
 
-    # Compute accuracy and timing
-    accuracy = np.mean(y_pred == y_test)
-    run_time = end_time - start_time
+    def run_shapedtw_experiment(dataset_name, shape_function, subsequence_length, n_neighbors):
+        result = {}
+        try:
+            logger = setup_logger(dataset_name, shape_function, subsequence_length, n_neighbors)
+            X_train, y_train, X_test, y_test = load_dataset_with_retry(dataset_name, logger)
 
-    # Log progress/info
-    logger.info(
-        "Finished: dataset=%s, shape_function=%s, accuracy=%.4f, runtime=%.2f seconds, "
-        "n_train=%d, n_test=%d",
-        dataset_name,
-        shape_function,
-        accuracy,
-        run_time,
-        len(y_train),
-        len(y_test),
-    )
+            # Replace NaN values with 0
+            X_train = np.nan_to_num(X_train)
+            X_test = np.nan_to_num(X_test)
 
-    # Return results as a dictionary
-    return {
-        "dataset": dataset_name,
-        "shape_function": shape_function,
-        "accuracy": accuracy,
-        "run_time_sec": run_time,
-        "n_train": len(y_train),
-        "n_test": len(y_test),
-        "subsequence_length": subsequence_length,
-        "n_neighbors": n_neighbors
-    }
-
-
-def run_shapedtw_experiments(
-    dataset_list=None,
-    shape_functions=None,
-    subsequence_length: int = 30,
-    n_neighbors: int = 1
-) -> pd.DataFrame:
-    """
-    Runs ShapeDTW on multiple datasets and shape descriptor functions,
-    returning the results as a pandas DataFrame.
-
-    Parameters
-    ----------
-    dataset_list : list of str, optional
-        List of dataset names. If None, defaults to univariate_equal_length from sktime.
-    shape_functions : list of str, optional
-        List of shape descriptor functions to test. If None, defaults to ["raw", "hog1d"].
-    subsequence_length : int, optional
-        Subsequence length for ShapeDTW, by default 30.
-    n_neighbors : int, optional
-        Number of neighbors for ShapeDTW, by default 1.
-
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with columns:
-        [dataset, shape_function, accuracy, run_time_sec, n_train, n_test, 
-         subsequence_length, n_neighbors].
-    """
-    if dataset_list is None:
-        dataset_list = tsc_dataset_names.univariate_equal_length
-    if shape_functions is None:
-        shape_functions = ["raw", "hog1d"]
-
-    results = []
-    for dataset_name in dataset_list:
-        for shape_func in shape_functions:
-            result_dict = run_shapedtw_on_dataset(
-                dataset_name=dataset_name,
-                shape_function=shape_func,
+            clf = ShapeDTW(
+                n_neighbors=n_neighbors,
                 subsequence_length=subsequence_length,
-                n_neighbors=n_neighbors
+                shape_descriptor_function=shape_function
             )
-            results.append(result_dict)
 
-    return pd.DataFrame(results)
+            process = psutil.Process(os.getpid())
+            initial_ram_usage = process.memory_info().rss
 
+            start_time = time.time()
+            start_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
 
-def main():
-    # Example usage:
-    # Choose a dataset or a list of datasets
-    example_dataset = "ECG200"
+            clf.fit(X_train, y_train)
+            y_pred = clf.predict(X_test)
 
-    # Choose shape descriptor functions
-    shape_funcs = ["raw", "hog1d"]
+            end_time = time.time()
+            end_date_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
+            total_time = end_time - start_time
 
-    # Run the experiment (single or multiple datasets)
-    df_results = run_shapedtw_experiments(
-        dataset_list=[example_dataset],
-        shape_functions=shape_funcs,
-        subsequence_length=30,
-        n_neighbors=1
-    )
+            final_ram_usage = process.memory_info().rss
+            ram_usage = (final_ram_usage - initial_ram_usage) / (1024 ** 3)
 
-    # Print out the results DataFrame
-    print(df_results)
+            accuracy = accuracy_score(y_test, y_pred)
+            f1 = f1_score(y_test, y_pred, average='macro')
+            precision = precision_score(y_test, y_pred, average='macro')
+            recall = recall_score(y_test, y_pred, average='macro')
 
+            result.update({
+                'Experiment': 'ShapeDTW',
+                'Dataset': dataset_name,
+                'Shape Function': shape_function,
+                'Subsequence Length': subsequence_length,
+                'N Neighbors': n_neighbors,
+                'Experiment Start Time': start_date_time,
+                'Experiment End Time': end_date_time,
+                'Experiment Total Time (seconds)': total_time,
+                'Accuracy': accuracy,
+                'F1 Score': f1,
+                'Precision': precision,
+                'Recall': recall,
+                'RAM Usage (GB)': ram_usage
+            })
 
-# If you run this script directly: 
-if __name__ == "__main__":
-    main()
+            result.update({
+                'Experiment Succeeded': True,
+                'Comment': 'Experiment completed successfully'
+            })
 
-# 4 CPU, 16 RAM
-# pip install setuptools==68.0.0  # A version compatible with Python 3.12
-# pip install distlib
+            logger.info('Test finished successfully')
+
+        except TimeoutError as e:
+            result.update({
+                'Experiment Succeeded': False,
+                'Comment': str(e)
+            })
+            logger.error(f'Experiment exceeded the time limit: {e}', exc_info=True)
+        except Exception as e:
+            result.update({
+                'Experiment Succeeded': False,
+                'Comment': str(e)
+            })
+            logger.error(f'An error occurred: {e}', exc_info=True)
+
+        df = pd.DataFrame(result, index=[0])
+
+        # Define the directory and file path
+        csv_dir = 'results'
+        csv_file_path = os.path.join(csv_dir, 'shapedtw_experiment_results.csv')
+
+        # Create the directory if it doesn't exist
+        os.makedirs(csv_dir, exist_ok=True)
+
+        lock_path = csv_file_path + '.lock'
+
+        with FileLock(lock_path):
+            if os.path.exists(csv_file_path):
+                df.to_csv(csv_file_path, mode='a', header=False, index=False)
+            else:
+                df.to_csv(csv_file_path, mode='w', header=True, index=False)
+
+        return result
+
+    def main():
+        parser = argparse.ArgumentParser(description='Run ShapeDTW experiment with specified parameters.')
+        parser.add_argument('--datasets', type=str, nargs='+', required=True, help='List of datasets to use.')
+        parser.add_argument('--shape_function', type=str, required=True, help='Shape descriptor function to use.')
+        parser.add_argument('--subsequence_length', type=int, default=30, help='Subsequence length for ShapeDTW.')
+        parser.add_argument('--n_neighbors', type=int, default=1, help='Number of neighbors for KNN in ShapeDTW.')
+        args = parser.parse_args()
+
+        for dataset in args.datasets:
+            result = run_shapedtw_experiment(dataset, args.shape_function, args.subsequence_length, args.n_neighbors)
+            print(result)
+
+    if __name__ == "__main__":
+        try:
+            main()
+        except TimeoutError as e:
+            print(f"Experiment exceeded the time limit: {e}")
+        except Exception as e:
+            print(f"An error occurred while running the script: {e}")
+        finally:
+            signal.alarm(0)  # Disable the alarm
+
+except Exception as e:
+    print(f"An error occurred in the main script: {e}")
