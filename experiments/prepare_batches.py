@@ -122,10 +122,10 @@ datasets = [
 # Split the datasets into N_PARALLEL_DATASETS groups
 dataset_groups = np.array_split(datasets, N_PARALLEL_DATASETS)
 
-k_values = [1, 3, 5]
-distance_metrics = ['euclidean', 'dtw', 'softdtw']
-gamma_values = [0.1, 1, 10]
-n_clusters = [3]
+# k_values = [1, 3, 5]
+# distance_metrics = ['euclidean', 'dtw', 'softdtw']
+# gamma_values = [0.1, 1, 10]
+# n_clusters = [3]
 
 sbatch_template_shapedtw_knn = """#!/bin/bash
 #SBATCH --partition main
