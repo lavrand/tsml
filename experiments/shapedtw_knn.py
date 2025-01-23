@@ -47,18 +47,41 @@ try:
         logger.addHandler(handler)
         return logger
 
+
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
+        dataset_dir = os.path.join("cached_datasets", dataset_name)
+
+        # Check if the dataset is cached
+        if os.path.exists(dataset_dir):
+            logger.info(f"Loading dataset '{dataset_name}' from cache.")
+            X_train = pd.read_pickle(os.path.join(dataset_dir, "X_train.pkl"))
+            y_train = pd.read_pickle(os.path.join(dataset_dir, "y_train.pkl"))
+            X_test = pd.read_pickle(os.path.join(dataset_dir, "X_test.pkl"))
+            y_test = pd.read_pickle(os.path.join(dataset_dir, "y_test.pkl"))
+            return X_train, y_train, X_test, y_test
+
+        # If not cached, attempt to download the dataset
         for attempt in range(retries):
             try:
+                logger.info(f"Downloading dataset '{dataset_name}' (attempt {attempt + 1})...")
                 X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train")
                 X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test")
+
+                # Cache the dataset locally
+                os.makedirs(dataset_dir, exist_ok=True)
+                X_train.to_pickle(os.path.join(dataset_dir, "X_train.pkl"))
+                y_train.to_pickle(os.path.join(dataset_dir, "y_train.pkl"))
+                X_test.to_pickle(os.path.join(dataset_dir, "X_test.pkl"))
+                y_test.to_pickle(os.path.join(dataset_dir, "y_test.pkl"))
+
                 return X_train, y_train, X_test, y_test
             except Exception as e:
-                logger.error(f"Attempt {attempt + 1} to load dataset {dataset_name} failed: {e}")
+                logger.error(f"Attempt {attempt + 1} to load dataset '{dataset_name}' failed: {e}")
                 if attempt < retries - 1:
                     time.sleep(delay)
                 else:
                     raise
+
 
     def run_shapedtw_experiment(dataset_name, shape_function, subsequence_length, n_neighbors):
         result = {}
