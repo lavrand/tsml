@@ -66,9 +66,9 @@ try:
             logger = setup_logger(dataset_name, shape_function, subsequence_length, n_neighbors)
             X_train, y_train, X_test, y_test = load_dataset_with_retry(dataset_name, logger)
 
-            # Replace NaN values with 0
-            X_train = np.nan_to_num(X_train)
-            X_test = np.nan_to_num(X_test)
+            # # Replace NaN values with 0
+            # X_train = np.nan_to_num(X_train)
+            # X_test = np.nan_to_num(X_test)
 
             clf = ShapeDTW(
                 n_neighbors=n_neighbors,
