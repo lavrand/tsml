@@ -1,7 +1,7 @@
 import os
 
-# Get a list of all sbatch files in the current directory
-sbatch_files = [f for f in os.listdir('.') if f.endswith('.sbatch')]
+# Get a list of all sbatch files in the current directory, excluding cache_datasets.sbatch
+sbatch_files = [f for f in os.listdir('.') if f.endswith('.sbatch') and f != 'cache_datasets.sbatch']
 
 # Initialize a counter for the number of batches started
 batches_started = 0
