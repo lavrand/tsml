@@ -6,8 +6,8 @@
 #SBATCH --error /cs_storage/andreyl/dtw_error_logs/cache_datasets-%J.err   # Error log file (%J will be replaced by the job ID)
 #SBATCH --mail-user=andreyl@post.bgu.ac.il  # Email for notifications
 #SBATCH --mail-type=FAIL                # Notify only on failures
-#SBATCH --mem=16G                       # Memory required for the job
-#SBATCH --cpus-per-task=4               # Number of CPU cores
+#SBATCH --mem=48G                       # Memory required for the job
+#SBATCH --cpus-per-task=16               # Number of CPU cores
 #SBATCH --tasks=1                       # Single task job
 
 # Load necessary modules (if required)
