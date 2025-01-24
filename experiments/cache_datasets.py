@@ -1,4 +1,6 @@
 import os
+import time
+
 import numpy as np
 from sktime.datasets import load_UCR_UEA_dataset
 
@@ -142,3 +144,4 @@ def cache_dataset(dataset_name):
 if __name__ == "__main__":
     for dataset in DATASETS:
         cache_dataset(dataset)
+        time.sleep(5)
