@@ -132,7 +132,8 @@ sbatch_template_shapedtw_knn = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 6-23:50:00
 #SBATCH --job-name shapedtw_knn_{shape_function}
-#SBATCH --output /cs_storage/andreyl/pancake/shapedtw_knn_{shape_function}-id-%J.out
+#SBATCH --output /cs_storage/andreyl/dtw_logs/dtw-%J.out  # Output log file (%J will be replaced by the job ID)
+#SBATCH --error /cs_storage/andreyl/dtw_error_logs/dtw-%J.err   # Error log file (%J will be replaced by the job ID)
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=FAIL
 #SBATCH --mem=16G
