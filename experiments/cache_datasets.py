@@ -1,13 +1,18 @@
 import os
-import time
 import numpy as np
-from sktime.datasets import load_UCR_UEA_dataset
+from sktime.datasets import load_from_tsfile_to_dataframe
 
-# Define the directory to store cached datasets
-CACHE_DIR = "cached_datasets"
+# Get the absolute path of the directory containing the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Path to the 'ds' directory
+DATASET_DIR = os.path.join(current_dir, 'ds')
+
+# Path to the cached datasets directory
+CACHE_DIR = os.path.join(current_dir, 'cached_datasets')
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-# List of datasets to pre-download
+# List of datasets to process
 DATASETS = (
     "ACSF1", "ArrowHead", "ItalyPowerDemand", "GunPoint", "OSULeaf",
     "Adiac", "Beef", "BeetleFly", "BirdChicken", "BME", "Car",
@@ -41,57 +46,51 @@ DATASETS = (
     "WordSynonyms", "Worms", "WormsTwoClass", "Yoga",
 )
 
-# Create a lock file for serialization
-LOCK_FILE = os.path.join(CACHE_DIR, "cache_lock.lock")
-
-
-def cache_dataset(dataset_name, retries=5, initial_delay=5):
+def cache_dataset(dataset_name):
     """
-    Cache a dataset with retries and adaptive delays to avoid cluster-specific issues.
-
-    Parameters:
-    - dataset_name (str): The name of the dataset to cache.
-    - retries (int): Number of retry attempts.
-    - initial_delay (int): Initial delay in seconds between retries.
+    Cache the specified dataset by reading the .ts file and converting it to NumPy format.
     """
-    for attempt in range(1, retries + 1):
-        try:
-            # Acquire lock to serialize dataset loading
-            with open(LOCK_FILE, "w") as lock:
-                print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Acquiring lock for {dataset_name}")
-                lock.write(f"Locking dataset: {dataset_name}\n")
+    try:
+        print(f"Processing dataset: {dataset_name}")
 
-                print(f"Attempting to cache dataset: {dataset_name} (Attempt {attempt})")
+        # Construct file paths for train and test sets
+        train_file = os.path.join(DATASET_DIR, dataset_name, f"{dataset_name}_TRAIN.ts")
+        test_file = os.path.join(DATASET_DIR, dataset_name, f"{dataset_name}_TEST.ts")
 
-                # Load the dataset
-                X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train", return_X_y=True)
-                X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test", return_X_y=True)
+        # Check if files exist
+        if not os.path.exists(train_file):
+            raise FileNotFoundError(f"Train file not found: {train_file}")
+        if not os.path.exists(test_file):
+            raise FileNotFoundError(f"Test file not found: {test_file}")
 
-                # Save datasets to cache
-                np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_train.npy"), X_train)
-                np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_train.npy"), y_train)
-                np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_test.npy"), X_test)
-                np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_test.npy"), y_test)
+        # Load train and test datasets
+        X_train, y_train = load_from_tsfile_to_dataframe(train_file)
+        X_test, y_test = load_from_tsfile_to_dataframe(test_file)
 
-                print(f"Successfully cached dataset: {dataset_name}")
-                return  # Exit the loop on success
-        except Exception as e:
-            print(f"Failed to cache dataset {dataset_name} on attempt {attempt}: {e}")
-            if attempt < retries:
-                delay = initial_delay * (2 ** (attempt - 1))  # Exponential backoff
-                print(f"Retrying {dataset_name} in {delay} seconds...")
-                time.sleep(delay)
-            else:
-                print(f"Exhausted retries for dataset {dataset_name}. Moving on.")
-        finally:
-            # Release lock
-            if os.path.exists(LOCK_FILE):
-                os.remove(LOCK_FILE)
+        # Log the structure of X_train and X_test
+        # print(f"Type of X_train: {type(X_train)}")
+        # print(f"First 5 rows of X_train: {X_train.head()}")
+        # print(f"Type of first element in X_train: {type(X_train.iloc[0, 0])}")
+        #
+        # print(f"Type of X_test: {type(X_test)}")
+        # print(f"First 5 rows of X_test: {X_test.head()}")
+        # print(f"Type of first element in X_test: {type(X_test.iloc[0, 0])}")
 
+        # Convert the dataframes to numpy arrays
+        X_train_np = np.array([row[0] for row in X_train.itertuples(index=False)])
+        X_test_np = np.array([row[0] for row in X_test.itertuples(index=False)])
+
+        # Save the datasets to the cache directory
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_train.npy"), X_train_np)
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_train.npy"), np.array(y_train))
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_X_test.npy"), X_test_np)
+        np.save(os.path.join(CACHE_DIR, f"{dataset_name}_y_test.npy"), np.array(y_test))
+
+        print(f"Successfully cached dataset: {dataset_name}")
+    except Exception as e:
+        print(f"Failed to cache dataset {dataset_name}: {e}")
 
 if __name__ == "__main__":
-    # Process datasets sequentially with delays
+    # Process each dataset in the list
     for dataset in DATASETS:
-        print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] Processing dataset: {dataset}")
-        cache_dataset(dataset, retries=5, initial_delay=20)
-        time.sleep(40)  # Fixed delay between datasets to avoid overlapping
+        cache_dataset(dataset)
