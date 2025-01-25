@@ -78,6 +78,14 @@ try:
             y_train = np.load(os.path.join(cache_dir, f"{dataset_name}_y_train.npy"), allow_pickle=True)
             X_test = np.load(os.path.join(cache_dir, f"{dataset_name}_X_test.npy"), allow_pickle=True)
             y_test = np.load(os.path.join(cache_dir, f"{dataset_name}_y_test.npy"), allow_pickle=True)
+
+            # Handle Nans - clf will send lots for pandas related warnings...
+            if dataset_name in tsc_dataset_names.univariate_variable_length:
+                X_train = pad_series_array(X_train.to_numpy())
+                X_test = pad_series_array(X_test.to_numpy())
+                X_train = np.expand_dims(X_train, axis=1)
+                X_test = np.expand_dims(X_test, axis=1)
+
             return X_train, y_train, X_test, y_test
 
         # Retry downloading the dataset
