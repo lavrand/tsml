@@ -4,15 +4,37 @@ import numpy as np
 # N_PARALLEL_DATASETS = 113
 N_PARALLEL_DATASETS = 8
 
+# dtw
+# datasets = [
+#     'AllGestureWiimoteY',
+#     'AllGestureWiimoteZ',
+#     'DodgerLoopDay',
+#     'DodgerLoopGame',
+#     'DodgerLoopWeekend',
+#     'MelbournePedestrian',
+#     'PLAID',
+#     'StarLightCurves'
+# ]
+
+# knn
 datasets = [
-    'AllGestureWiimoteY',
-    'AllGestureWiimoteZ',
-    'DodgerLoopDay',
-    'DodgerLoopGame',
-    'DodgerLoopWeekend',
-    'MelbournePedestrian',
+    'Crop',
+    'EOGVerticalSignal',
+    'EthanolLevel',
+    'FordA',
+    'HandOutlines',
+    'MixedShapesRegularTrain',
+    'MixedShapesSmallTrain',
+    'NonInvasiveFetalECGThorax1',
+    'NonInvasiveFetalECGThorax2',
     'PLAID',
-    'StarLightCurves'
+    'PickupGestureWiimoteZ',
+    'SemgHandGenderCh2',
+    'SemgHandMovementCh2',
+    'SemgHandSubjectCh2',
+    'ShakeGestureWiimoteZ',
+    'StarLightCurves',
+    'UWaveGestureLibraryAll'
 ]
 
 # Split the datasets into N_PARALLEL_DATASETS groups
