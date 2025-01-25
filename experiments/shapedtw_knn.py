@@ -48,22 +48,22 @@ try:
         return logger
 
 
-    # padding for variable length series
-    def pad_series_array(series_array):
+    def pad_series_array(series_array, max_length=None):
         # Ensure we are working with a flattened array of Series
         series_list = [s if isinstance(s, pd.Series) else s[0] for s in series_array]
 
         # Convert each Series to a list
         list_of_lists = [s.tolist() for s in series_list]
 
-        # Find the length of the longest Series
-        max_length = max(len(lst) for lst in list_of_lists)
+        # Find the length of the longest Series if max_length is not provided
+        if max_length is None:
+            max_length = max(len(lst) for lst in list_of_lists)
 
         # Pad each list with zeros to the max length
         padded_lists = [lst + [0] * (max_length - len(lst)) for lst in list_of_lists]
 
         # Convert the padded lists to a NumPy array
-        return np.array(padded_lists, dtype=float)
+        return np.array(padded_lists, dtype=float), max_length
 
     def pad_series_array(series_array, max_length=None):
         # Ensure we are working with a flattened array of Series
