@@ -81,8 +81,8 @@ try:
 
             # Handle Nans - clf will send lots for pandas related warnings...
             if dataset_name in tsc_dataset_names.univariate_variable_length:
-                X_train = pad_series_array(X_train.to_numpy())
-                X_test = pad_series_array(X_test.to_numpy())
+                X_train = pad_series_array(X_train)
+                X_test = pad_series_array(X_test)
                 X_train = np.expand_dims(X_train, axis=1)
                 X_test = np.expand_dims(X_test, axis=1)
 
@@ -97,8 +97,8 @@ try:
 
                 # Handle Nans - clf will send lots for pandas related warnings...
                 if dataset_name in tsc_dataset_names.univariate_variable_length:
-                    X_train = pad_series_array(X_train.to_numpy())
-                    X_test = pad_series_array(X_test.to_numpy())
+                    X_train = pad_series_array(X_train)
+                    X_test = pad_series_array(X_test)
                     X_train = np.expand_dims(X_train, axis=1)
                     X_test = np.expand_dims(X_test, axis=1)
 
