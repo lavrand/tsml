@@ -48,6 +48,23 @@ try:
         return logger
 
 
+    # padding for variable length series
+    def pad_series_array(series_array):
+        # Ensure we are working with a flattened array of Series
+        series_list = [s if isinstance(s, pd.Series) else s[0] for s in series_array]
+
+        # Convert each Series to a list
+        list_of_lists = [s.tolist() for s in series_list]
+
+        # Find the length of the longest Series
+        max_length = max(len(lst) for lst in list_of_lists)
+
+        # Pad each list with zeros to the max length
+        padded_lists = [lst + [0] * (max_length - len(lst)) for lst in list_of_lists]
+
+        # Convert the padded lists to a NumPy array
+        return np.array(padded_lists, dtype=float)
+
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
         cache_dir = "cached_datasets"
 
@@ -69,6 +86,13 @@ try:
                 logger.info(f"Downloading dataset '{dataset_name}' (attempt {attempt + 1})...")
                 X_train, y_train = load_UCR_UEA_dataset(dataset_name, split="train", return_X_y=True)
                 X_test, y_test = load_UCR_UEA_dataset(dataset_name, split="test", return_X_y=True)
+
+                # Handle Nans - clf will send lots for pandas related warnings...
+                if dataset_name in tsc_dataset_names.univariate_variable_length:
+                    X_train = pad_series_array(X_train.to_numpy())
+                    X_test = pad_series_array(X_test.to_numpy())
+                    X_train = np.expand_dims(X_train, axis=1)
+                    X_test = np.expand_dims(X_test, axis=1)
 
                 # Cache the dataset locally
                 np.save(os.path.join(cache_dir, f"{dataset_name}_X_train.npy"), X_train)
