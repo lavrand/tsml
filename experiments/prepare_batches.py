@@ -2,17 +2,15 @@ import os
 import numpy as np
 
 # N_PARALLEL_DATASETS = 113
-N_PARALLEL_DATASETS = 18
+N_PARALLEL_DATASETS = 16
 
 datasets = [
     'AllGestureWiimoteX',
     'AllGestureWiimoteY',
     'AllGestureWiimoteZ',
-    'Crop',
     'DodgerLoopDay',
     'DodgerLoopGame',
     'DodgerLoopWeekend',
-    'ElectricDevices',
     'GestureMidAirD1',
     'GestureMidAirD2',
     'GestureMidAirD3',
