@@ -1,22 +1,14 @@
 import csv
 
 datasets = [
-    'AllGestureWiimoteX',
     'AllGestureWiimoteY',
     'AllGestureWiimoteZ',
     'DodgerLoopDay',
     'DodgerLoopGame',
     'DodgerLoopWeekend',
-    'GestureMidAirD1',
-    'GestureMidAirD2',
-    'GestureMidAirD3',
-    'GesturePebbleZ1',
-    'GesturePebbleZ2',
     'MelbournePedestrian',
     'PLAID',
-    'PickupGestureWiimoteZ',
-    'ShakeGestureWiimoteZ',
-    'StarlightCurves'
+    'StarLightCurves'
 ]
 print(f"Number of datasets: {len(datasets)}")
 
