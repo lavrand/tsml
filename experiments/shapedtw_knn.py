@@ -65,6 +65,23 @@ try:
         # Convert the padded lists to a NumPy array
         return np.array(padded_lists, dtype=float)
 
+    def pad_series_array(series_array, max_length=None):
+        # Ensure we are working with a flattened array of Series
+        series_list = [s if isinstance(s, pd.Series) else s[0] for s in series_array]
+
+        # Convert each Series to a list
+        list_of_lists = [s.tolist() for s in series_list]
+
+        # Find the length of the longest Series if max_length is not provided
+        if max_length is None:
+            max_length = max(len(lst) for lst in list_of_lists)
+
+        # Pad each list with zeros to the max length
+        padded_lists = [lst + [0] * (max_length - len(lst)) for lst in list_of_lists]
+
+        # Convert the padded lists to a NumPy array
+        return np.array(padded_lists, dtype=float), max_length
+
     def load_dataset_with_retry(dataset_name, logger, retries=3, delay=5):
         cache_dir = "cached_datasets"
 
@@ -81,8 +98,8 @@ try:
 
             # Handle Nans - clf will send lots for pandas related warnings...
             if dataset_name in tsc_dataset_names.univariate_variable_length:
-                X_train = pad_series_array(X_train)
-                X_test = pad_series_array(X_test)
+                X_train, max_length = pad_series_array(X_train)
+                X_test, _ = pad_series_array(X_test, max_length)
                 X_train = np.expand_dims(X_train, axis=1)
                 X_test = np.expand_dims(X_test, axis=1)
 
@@ -97,8 +114,8 @@ try:
 
                 # Handle Nans - clf will send lots for pandas related warnings...
                 if dataset_name in tsc_dataset_names.univariate_variable_length:
-                    X_train = pad_series_array(X_train)
-                    X_test = pad_series_array(X_test)
+                    X_train, max_length = pad_series_array(X_train)
+                    X_test, _ = pad_series_array(X_test, max_length)
                     X_train = np.expand_dims(X_train, axis=1)
                     X_test = np.expand_dims(X_test, axis=1)
 
