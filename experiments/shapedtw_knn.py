@@ -52,8 +52,8 @@ try:
         # Ensure we are working with a flattened array of Series
         series_list = [s if isinstance(s, pd.Series) else s[0] for s in series_array]
 
-        # Convert each Series to a list
-        list_of_lists = [s.tolist() for s in series_list]
+        # Convert each Series to a list and replace NaNs with zeros
+        list_of_lists = [s.fillna(0).tolist() for s in series_list]
 
         # Find the length of the longest Series if max_length is not provided
         if max_length is None:
