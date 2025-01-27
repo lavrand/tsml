@@ -6,7 +6,7 @@ def timeout_handler(signum, frame):
 
 # Set the signal handler and a 6-hour alarm
 signal.signal(signal.SIGALRM, timeout_handler)
-signal.alarm(6 * 60 * 60)  # 6 hours in seconds
+signal.alarm(12 * 60 * 60)  # 6 hours in seconds
 
 try:
     try:
