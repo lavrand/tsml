@@ -1,24 +1,12 @@
 import os
 import numpy as np
 
-# DTW_N_PARALLEL_DATASETS = 8
 DTW_N_PARALLEL_DATASETS = 128
-KNN_N_PARALLEL_DATASETS = 17
+KNN_N_PARALLEL_DATASETS = 128
 
-IS_RUN_DTW = True
-IS_RUN_KNN = True
+IS_RUN_DTW = False
+IS_RUN_KNN = False
 
-# dtw "raw", "hog1d"
-# dtw_datasets = [
-#     'AllGestureWiimoteY',
-#     'AllGestureWiimoteZ',
-#     'DodgerLoopDay',
-#     'DodgerLoopGame',
-#     'DodgerLoopWeekend',
-#     'MelbournePedestrian',
-#     'PLAID',
-#     'StarLightCurves'
-# ]
 
 # dtw "derivative"
 dtw_datasets = [
@@ -154,23 +142,134 @@ dtw_datasets = [
 
 # knn
 knn_datasets = [
+    'ACSF1',
+    'Adiac',
+    'AllGestureWiimoteX',
+    'AllGestureWiimoteY',
+    'AllGestureWiimoteZ',
+    'ArrowHead',
+    'BME',
+    'Beef',
+    'BeetleFly',
+    'BirdChicken',
+    'CBF',
+    'Car',
+    'Chinatown',
+    'ChlorineConcentration',
+    'CinCECGTorso',
+    'Coffee',
+    'Computers',
+    'CricketX',
+    'CricketY',
+    'CricketZ',
     'Crop',
+    'DiatomSizeReduction',
+    'DistalPhalanxOutlineAgeGroup',
+    'DistalPhalanxOutlineCorrect',
+    'DistalPhalanxTW',
+    'DodgerLoopDay',
+    'DodgerLoopGame',
+    'DodgerLoopWeekend',
+    'ECG200',
+    'ECG5000',
+    'ECGFiveDays',
+    'EOGHorizontalSignal',
     'EOGVerticalSignal',
+    'Earthquakes',
+    'ElectricDevices',
     'EthanolLevel',
+    'FaceAll',
+    'FaceFour',
+    'FacesUCR',
+    'FiftyWords',
+    'Fish',
     'FordA',
+    'FordB',
+    'FreezerRegularTrain',
+    'FreezerSmallTrain',
+    'Fungi',
+    'GestureMidAirD1',
+    'GestureMidAirD2',
+    'GestureMidAirD3',
+    'GesturePebbleZ1',
+    'GesturePebbleZ2',
+    'GunPoint',
+    'GunPointAgeSpan',
+    'GunPointMaleVersusFemale',
+    'GunPointOldVersusYoung',
+    'Ham',
     'HandOutlines',
+    'Haptics',
+    'Herring',
+    'HouseTwenty',
+    'InlineSkate',
+    'InsectEPGRegularTrain',
+    'InsectEPGSmallTrain',
+    'InsectWingbeatSound',
+    'ItalyPowerDemand',
+    'LargeKitchenAppliances',
+    'Lightning2',
+    'Lightning7',
+    'Mallat',
+    'Meat',
+    'MedicalImages',
+    'MelbournePedestrian',
+    'MiddlePhalanxOutlineAgeGroup',
+    'MiddlePhalanxOutlineCorrect',
+    'MiddlePhalanxTW',
     'MixedShapesRegularTrain',
     'MixedShapesSmallTrain',
+    'MoteStrain',
     'NonInvasiveFetalECGThorax1',
     'NonInvasiveFetalECGThorax2',
+    'OSULeaf',
+    'OliveOil',
     'PLAID',
+    'PhalangesOutlinesCorrect',
+    'Phoneme',
     'PickupGestureWiimoteZ',
+    'PigAirwayPressure',
+    'PigArtPressure',
+    'PigCVP',
+    'Plane',
+    'PowerCons',
+    'ProximalPhalanxOutlineAgeGroup',
+    'ProximalPhalanxOutlineCorrect',
+    'ProximalPhalanxTW',
+    'RefrigerationDevices',
+    'Rock',
+    'ScreenType',
     'SemgHandGenderCh2',
     'SemgHandMovementCh2',
     'SemgHandSubjectCh2',
     'ShakeGestureWiimoteZ',
+    'ShapeletSim',
+    'ShapesAll',
+    'SmallKitchenAppliances',
+    'SmoothSubspace',
+    'SonyAIBORobotSurface1',
+    'SonyAIBORobotSurface2',
     'StarLightCurves',
-    'UWaveGestureLibraryAll'
+    'Strawberry',
+    'SwedishLeaf',
+    'Symbols',
+    'SyntheticControl',
+    'ToeSegmentation1',
+    'ToeSegmentation2',
+    'Trace',
+    'TwoLeadECG',
+    'TwoPatterns',
+    'UMD',
+    'UWaveGestureLibraryAll',
+    'UWaveGestureLibraryX',
+    'UWaveGestureLibraryY',
+    'UWaveGestureLibraryZ',
+    'Wafer',
+    'Wine',
+    'WordSynonyms',
+    'Worms',
+    'WormsTwoClass',
+    'Yoga'
 ]
 
 # Split the datasets into N_PARALLEL_DATASETS groups
@@ -238,7 +337,7 @@ sbatch_template_ncc = """#!/bin/bash
 #SBATCH --output /cs_storage/andreyl/pancake/ncc_{metric}_{gamma}-id-%J.out
 #SBATCH --mail-user=andreyl@post.bgu.ac.il
 #SBATCH --mail-type=FAIL
-#SBATCH --mem=4G
+#SBATCH --mem=10G
 #SBATCH --cpus-per-task=4
 #SBATCH --tasks=1
 
@@ -271,17 +370,17 @@ for group in knn_dataset_groups:
     group = list(group)  # Convert array back to list
     first_dataset = group[0]
     last_dataset = group[-1]
-    for k in k_values:
-        for metric in distance_metrics:
-            if metric == 'softdtw':
-                for gamma in gamma_values:
-                    sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma=gamma)
-                    with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}_{gamma}.sbatch", "w") as f:
-                        f.write(sbatch_content_knn)
-            else:
-                sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma="")
-                with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}.sbatch", "w") as f:
-                    f.write(sbatch_content_knn)
+    # for k in k_values:
+    #     for metric in distance_metrics:
+    #         if metric == 'softdtw':
+    #             for gamma in gamma_values:
+    #                 sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma=gamma)
+    #                 with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}_{gamma}.sbatch", "w") as f:
+    #                     f.write(sbatch_content_knn)
+    #         else:
+    #             sbatch_content_knn = sbatch_template_knn.format(datasets="_".join(group), k=k, metric=metric, gamma="")
+    #             with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}.sbatch", "w") as f:
+    #                 f.write(sbatch_content_knn)
 
     for metric in distance_metrics:
         if metric == 'softdtw':
@@ -294,14 +393,14 @@ for group in knn_dataset_groups:
             with open(f"ncc_{first_dataset}_{last_dataset}_{metric}.sbatch", "w") as f:
                 f.write(sbatch_content_ncc)
 
-    for n_cluster in n_clusters:
-        for metric in distance_metrics:
-            if metric == 'softdtw':
-                for gamma in gamma_values:
-                    sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma=gamma)
-                    with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
-                        f.write(sbatch_content_clustering)
-            else:
-                sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma="")
-                with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}.sbatch", "w") as f:
-                    f.write(sbatch_content_clustering)
+    # for n_cluster in n_clusters:
+    #     for metric in distance_metrics:
+    #         if metric == 'softdtw':
+    #             for gamma in gamma_values:
+    #                 sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma=gamma)
+    #                 with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
+    #                     f.write(sbatch_content_clustering)
+    #         else:
+    #             sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma="")
+    #             with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}.sbatch", "w") as f:
+    #                 f.write(sbatch_content_clustering)
