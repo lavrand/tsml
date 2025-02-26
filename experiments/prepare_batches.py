@@ -4,10 +4,6 @@ import numpy as np
 DTW_N_PARALLEL_DATASETS = 128
 KNN_N_PARALLEL_DATASETS = 128
 
-IS_RUN_DTW = False
-IS_RUN_KNN = False
-
-
 # dtw "derivative"
 dtw_datasets = [
     'ACSF1',
@@ -299,20 +295,6 @@ source activate tsml
 bash shapedtw_knn.sh {datasets} {shape_function}
 """
 
-# shape_functions = ["raw", "hog1d"]
-shape_functions = ["derivative"]
-
-for group in dtw_dataset_groups:
-    if len(group) == 0:
-        continue
-    group = list(group)  # Convert array back to list
-    first_dataset = group[0]
-    last_dataset = group[-1]
-    for shape_function in shape_functions:
-        sbatch_content_shapedtw_knn = sbatch_template_shapedtw_knn.format(datasets="_".join(group), shape_function=shape_function)
-        with open(f"shapedtw_knn_{first_dataset}_{last_dataset}_{shape_function}.sbatch", "w") as f:
-            f.write(sbatch_content_shapedtw_knn)
-
 sbatch_template_knn = """#!/bin/bash
 #SBATCH --partition main
 #SBATCH --time 6-23:50:00
@@ -382,25 +364,40 @@ for group in knn_dataset_groups:
     #             with open(f"knn_{first_dataset}_{last_dataset}_{k}_{metric}.sbatch", "w") as f:
     #                 f.write(sbatch_content_knn)
 
-    for metric in distance_metrics:
-        if metric == 'softdtw':
-            for gamma in gamma_values:
-                sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma=gamma)
-                with open(f"ncc_{first_dataset}_{last_dataset}_{metric}_{gamma}.sbatch", "w") as f:
-                    f.write(sbatch_content_ncc)
-        else:
-            sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma="")
-            with open(f"ncc_{first_dataset}_{last_dataset}_{metric}.sbatch", "w") as f:
-                f.write(sbatch_content_ncc)
+    # for metric in distance_metrics:
+    #     if metric == 'softdtw':
+    #         for gamma in gamma_values:
+    #             sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma=gamma)
+    #             with open(f"ncc_{first_dataset}_{last_dataset}_{metric}_{gamma}.sbatch", "w") as f:
+    #                 f.write(sbatch_content_ncc)
+    #     else:
+    #         sbatch_content_ncc = sbatch_template_ncc.format(datasets="_".join(group), metric=metric, gamma="")
+    #         with open(f"ncc_{first_dataset}_{last_dataset}_{metric}.sbatch", "w") as f:
+    #             f.write(sbatch_content_ncc)
 
-    # for n_cluster in n_clusters:
-    #     for metric in distance_metrics:
-    #         if metric == 'softdtw':
-    #             for gamma in gamma_values:
-    #                 sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma=gamma)
-    #                 with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
-    #                     f.write(sbatch_content_clustering)
-    #         else:
-    #             sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma="")
-    #             with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}.sbatch", "w") as f:
-    #                 f.write(sbatch_content_clustering)
+    for n_cluster in n_clusters:
+        for metric in distance_metrics:
+            if metric == 'softdtw':
+                for gamma in gamma_values:
+                    sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma=gamma)
+                    with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}_{gamma}.sbatch", "w") as f:
+                        f.write(sbatch_content_clustering)
+            else:
+                sbatch_content_clustering = sbatch_template_clustering.format(datasets="_".join(group), n_cluster=n_cluster, metric=metric, gamma="")
+                with open(f"clustering_{first_dataset}_{last_dataset}_{n_cluster}_{metric}.sbatch", "w") as f:
+                    f.write(sbatch_content_clustering)
+
+    # shape_functions = ["raw", "hog1d"]
+    # shape_functions = ["derivative"]
+    #
+    # for group in dtw_dataset_groups:
+    #     if len(group) == 0:
+    #         continue
+    #     group = list(group)  # Convert array back to list
+    #     first_dataset = group[0]
+    #     last_dataset = group[-1]
+    #     for shape_function in shape_functions:
+    #         sbatch_content_shapedtw_knn = sbatch_template_shapedtw_knn.format(datasets="_".join(group),
+    #                                                                           shape_function=shape_function)
+    #         with open(f"shapedtw_knn_{first_dataset}_{last_dataset}_{shape_function}.sbatch", "w") as f:
+    #             f.write(sbatch_content_shapedtw_knn)
